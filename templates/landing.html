@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SousChef AI — Your Intelligent Kitchen Companion{% endblock %}
+
+{% block content %}
+
+<!-- ===== HERO SECTION ===== -->
+<section id="hero">
+    <div class="container">
+        <div class="row align-items-center min-vh-80">
+
+            <div class="col-lg-6">
+                <h1 class="hero-title">
+                    Cook Like a Chef, Even if You Are a Beginner
+
+                </h1>
+                <p class="hero-subtitle">
+                    Smart recipes that adapt to your skill level, with a digital coach guiding every step.
+                </p>
+                <div class="hero-buttons">
+                    <a href="/recipes/" class="btn btn-hero-primary">
+                        Explore Our Recipes
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-hero-primary" onclick="window.location.href=this.href; return false;">
+                        Begin The Journey Now !
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-6 hero-image-col d-flex justify-content-end">
+                <div class="hero-image-wrapper hero-image-wrapper--right">
+                    <img src="{% static 'images/hero-image.jpg' %}"
+                         alt="Cooking with fresh ingredients"
+                         class="hero-image hero-image--cover"
+                         loading="lazy"
+                         style="width: 100%; height: 420px; object-fit: cover; object-position: center; border-radius: 24px; box-shadow: 0 18px 45px rgba(44, 24, 16, 0.25);">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ===== FEATURES SECTION ===== -->
+<section id="features">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Everything You Need In The Kitchen</h2>
+            <p>From pantry management to AI-powered recipe discovery</p>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">🥬</div>
+                    <h5>Smart Pantry</h5>
+                    <p>Track your ingredients by category. Never forget what you have at home.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h5>Recipe Discovery</h5>
+                    <p>Search thousands of recipes filtered by time, difficulty and ingredients.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h5>AI Assistance</h5>
+                    <p>Get personalised suggestions and step-by-step guidance from Gemini AI.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">👨‍🍳</div>
+                    <h5>Interactive Kitchen</h5>
+                    <p>Follow recipes step by step with technique explanations as you cook.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ===== PERSONAS SECTION ===== -->
+<section id="personas">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>SousChef For Every Lifestyle</h2>
+            <p>Personalised help that fits how you actually live and cook</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="persona-card">
+                    <div class="persona-icon">
+                        <img src="{% static 'images/persona-student.jpg' %}"
+                             alt="Student persona"
+                             class="persona-icon-image">
+                    </div>
+                    <h5>Students</h5>
+                    <p>Budget‑friendly recipes that turn “whatever’s left” into real meals.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="persona-card">
+                    <div class="persona-icon">
+                        <img src="{% static 'images/persona-busy_prof.jpg' %}"
+                             alt="Professional persona"
+                             class="persona-icon-image">
+                    </div>
+                    <h5>Busy Professionals</h5>
+                    <p>Quick, low‑stress cooking plans for weeknights and tight schedules.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="persona-card">
+                    <div class="persona-icon">
+                        <img src="{% static 'images/persona-family.jpg' %}"
+                             alt="Family persona"
+                             class="persona-icon-image"> 
+                    </div>
+                    <h5>Families</h5>
+                    <p>Flexible meals everyone can enjoy, with easy swaps for picky eaters.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="persona-card">
+                    <div class="persona-icon">
+                        <img src="{% static 'images/persona-fitness.jpg' %}"
+                             alt="Fitness persona"
+                             class="persona-icon-image">
+                    </div>
+                    <h5>Fitness‑Focused</h5>
+                    <p>High‑protein, goal‑friendly recipes with smart ingredient tracking.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section id="how-it-works">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>How It Works</h2>
+            <p>Three simple steps to better cooking</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+
+            <div class="col-lg-4 col-md-6">
+                <div class="step-card">
+                    <div class="step-number">01</div>
+                    <h5>Add Your Ingredients</h5>
+                    <p>Tell us what's in your pantry. Add ingredients by category and quantity.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="step-card">
+                    <div class="step-number">02</div>
+                    <h5>Discover Recipes</h5>
+                    <p>Browse recipes that match what you have. Filter by time and difficulty.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="step-card">
+                    <div class="step-number">03</div>
+                    <h5>Cook With AI</h5>
+                    <p>Follow interactive steps with your AI sous chef guiding you along the way.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ===== STATS BANNER ===== -->
+<section id="stats">
+    <div class="container">
+        <div class="stats-wrapper">
+            <div class="row text-center">
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <h3>50,000+</h3>
+                        <p>Recipes Available</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <h3>AI Powered</h3>
+                        <p>By Gemini 2.0</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <h3>3 Steps</h3>
+                        <p>To Better Cooking</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- ===== CALL TO ACTION ===== -->
+<section id="cta">
+    <div class="container">
+        <div class="cta-wrapper text-center">
+            <span class="hero-badge">Get started in minutes</span>
+            <h2>Turn Everyday Cooking Into Something Exceptional</h2>
+            <p>Set up your smart pantry, discover tailored recipes, and cook with step‑by‑step AI guidance — all in one place.</p>
+
+            <div class="cta-actions d-flex flex-column flex-sm-row justify-content-center gap-3 mt-3">
+                <a href="{% url 'login' %}" class="btn btn-cta" onclick="window.location.href=this.href; return false;">
+                    Join Us Now !
+                </a>
+                <a href="/pricing/" class="btn btn-cta">
+                    View Our Plans & Features
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== SUPPORT & SAFETY NET ===== -->
+<section id="support">
+    <div class="container">
+        <div class="support-wrapper">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-6">
+                    <h2>You’re Never Cooking Alone Anymore</h2>
+                    <p>
+                        We will stick with you at every step with clear guidance,
+                        helpful tips, and simple ways to tweak any recipe to your taste.
+                    </p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <div class="support-pill">Help Center</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="support-pill">Step‑by‑step FAQs</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="support-pill">Undo & Adjust Steps</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

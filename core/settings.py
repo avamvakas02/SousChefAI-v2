@@ -9,8 +9,13 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-from dotenv import load_dotenv
 import os
+
+try:
+    from dotenv import load_dotenv  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    def load_dotenv(*args, **kwargs):
+        return False
 
 load_dotenv()
 from pathlib import Path
@@ -33,25 +38,69 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app']
 
 # Application definition
 
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+import importlib.util
 
-    #Third-party apps
-    'crispy-forms',
-    'crispy_bootstrap5', 
+def _has_module(module_name: str) -> bool:
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except ModuleNotFoundError:
+        return False
 
-    #My custom apps
-    'users',
-    'pantry',
-    'recipes',
-    'ai_assistant',
-    'pages'
+_DJANGO_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
 ]
+
+_OPTIONAL_THIRD_PARTY_APPS = [
+    "crispy_forms",
+    "crispy_bootstrap5",
+]
+
+_OPTIONAL_ALLAUTH_APPS = [
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
+]
+
+_LOCAL_APPS = [
+    "users",
+    "pantry",
+    "recipes",
+    "ai_assistant",
+    "pages",
+]
+
+INSTALLED_APPS = (
+    _DJANGO_APPS
+    + [app for app in _OPTIONAL_THIRD_PARTY_APPS if _has_module(app)]
+    + [app for app in _OPTIONAL_ALLAUTH_APPS if _has_module(app)]
+    + _LOCAL_APPS
+)
+
+ALLAUTH_ENABLED = _has_module("allauth")
+
+if ALLAUTH_ENABLED:
+    SITE_ID = int(os.getenv("SITE_ID", "1"))
+
+    AUTHENTICATION_BACKENDS = (
+        "django.contrib.auth.backends.ModelBackend",
+        "allauth.account.auth_backends.AuthenticationBackend",
+    )
+
+    LOGIN_REDIRECT_URL = "/"
+    LOGOUT_REDIRECT_URL = "/"
+
+    ACCOUNT_AUTHENTICATION_METHOD = "username"
+    ACCOUNT_USERNAME_REQUIRED = True
+    ACCOUNT_EMAIL_REQUIRED = True
+    ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -63,6 +112,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if ALLAUTH_ENABLED:
+    MIDDLEWARE += [
+        "allauth.account.middleware.AccountMiddleware",
+    ]
 
 ROOT_URLCONF = 'core.urls'
 
@@ -87,14 +141,25 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-import dj_database_url
+try:
+    import dj_database_url  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    dj_database_url = None
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
-    )
-}
+if dj_database_url is None:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+            conn_max_age=600,
+        )
+    }
 
 
 

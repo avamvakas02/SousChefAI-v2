@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings — SousChefAI{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="account-card p-4 rounded-4 bg-white shadow-sm">
+                    <h1 class="mb-3">Account Settings</h1>
+                    <p class="text-muted mb-4">
+                        You are logged in as <strong>{{ request.user.username }}</strong>.
+                        From here you can safely log out or permanently delete your account.
+                    </p>
+
+                    <div class="d-flex flex-column gap-3">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-hero-primary w-100">
+                                Log out
+                            </button>
+                        </form>
+
+                        <form method="post" action="{% url 'delete_account' %}"
+                              onsubmit="return confirm('Are you sure you want to permanently delete your account? This cannot be undone.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger w-100">
+                                Permanently delete my account
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
