@@ -403,6 +403,13 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1rem;
 }
 
+.feature-icon-image {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    display: inline-block;
+}
+
 .feature-card h5 {
     font-size: 1.1rem;
     margin-bottom: 0.8rem;
