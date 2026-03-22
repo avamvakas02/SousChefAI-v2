@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}SousChef AI — Your Intelligent Kitchen Companion{% endblock %}
+{% block title %}SousChefAI/Home{% endblock %}
 
 {% block content %}
 
@@ -22,8 +22,8 @@
                     <a href="/recipes/" class="btn btn-hero-primary">
                         Explore Our Recipes
                     </a>
-                    <a href="{% url 'login' %}" class="btn btn-hero-primary" onclick="window.location.href=this.href; return false;">
-                        Begin The Journey Now !
+                    <a href="{% url 'register' %}" class="btn btn-hero-primary" onclick="window.location.href=this.href; return false;">
+                        Begin Your Journey
                     </a>
                 </div>
             </div>
@@ -101,7 +101,7 @@
     <div class="container">
         <div class="section-header text-center">
             <h2>SousChef For Every Lifestyle</h2>
-            <p>Personalised help that fits how you actually live and cook</p>
+            <p>Personalized help that fits how you actually live and cook</p>
         </div>
 
         <div class="row g-4">
@@ -217,6 +217,12 @@
                         <p>To Better Cooking</p>
                     </div>
                 </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                        <h3>100%</h3>
+                        <p>Satisfaction Guaranteed</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -233,7 +239,7 @@
             <p>Set up your smart pantry, discover tailored recipes, and cook with step‑by‑step AI guidance — all in one place.</p>
 
             <div class="cta-actions d-flex flex-column flex-sm-row justify-content-center gap-3 mt-3">
-                <a href="{% url 'login' %}" class="btn btn-cta" onclick="window.location.href=this.href; return false;">
+                <a href="{% url 'register' %}" class="btn btn-cta" onclick="window.location.href=this.href; return false;">
                     Join Us Now !
                 </a>
                 <a href="/pricing/" class="btn btn-cta">

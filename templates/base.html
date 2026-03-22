@@ -45,7 +45,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/pantry/">Pantry</a>
+                    <a class="nav-link" href="{% url 'pantry' %}">Pantry</a>
                 </li>
 
                 <li class="nav-item">
@@ -106,7 +106,7 @@
                 <h6 class="footer-heading">Explore</h6>
                 <ul class="footer-links">
                     <li><a href="/">Home</a></li>
-                    <li><a href="/pantry/">Pantry</a></li>
+                    <li><a href="{% url 'pantry' %}">Pantry</a></li>
                     <li><a href="/recipes/">Recipes</a></li>
                 </ul>
             </div>
@@ -129,7 +129,7 @@
                         <li><a href="{% url 'account_settings' %}">Account settings</a></li>
                     {% else %}
                         <li><a href="{% url 'login' %}">Login</a></li>
-                        <li><a href="{% url 'login' %}">Sign Up</a></li>
+                        <li><a href="{% url 'register' %}">Sign Up</a></li>
                     {% endif %}
                 </ul>
             </div>

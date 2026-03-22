@@ -556,3 +556,78 @@ h1, h2, h3, h4, h5, h6 {
 .cta-actions {
     margin-top: 1rem;
 }
+
+/* ========================================
+   PANTRY PAGE
+======================================== */
+.pantry-page {
+    background-color: var(--bg-cream);
+    min-height: 60vh;
+}
+
+.pantry-hero-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.pantry-hero-sub {
+    font-size: 1.05rem;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pantry-card {
+    background: var(--white);
+    border-radius: 20px;
+    border: 1px solid rgba(200, 96, 42, 0.12);
+}
+
+.pantry-filter-pill {
+    border-radius: 999px;
+    border: 1px solid var(--bg-warm);
+    background: var(--bg-cream);
+    color: var(--text-medium);
+    font-weight: 500;
+    padding: 0.35rem 0.85rem;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.pantry-filter-pill:hover {
+    background: var(--bg-warm);
+    color: var(--text-dark);
+    border-color: var(--primary-light);
+}
+
+.pantry-filter-pill.active {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+}
+
+.pantry-filter-pill.active .pantry-filter-badge {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: var(--white);
+}
+
+.pantry-filter-badge {
+    background: var(--bg-warm) !important;
+    color: var(--text-medium);
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+.pantry-item-list .pantry-item-row {
+    border-color: rgba(44, 24, 16, 0.08) !important;
+}
+
+.pantry-item-list .pantry-item-row:last-child {
+    border-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.pantry-empty {
+    margin-top: 0.5rem;
+}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pantry — SousChefAI{% endblock %}
+
+{% block content %}
+<section id="pantry-page" class="pantry-page py-5">
+    <div class="container">
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10 text-center">
+                <h1 class="pantry-hero-title">Your Pantry</h1>
+                <p class="pantry-hero-sub text-muted mb-0">
+                    Track what you have at home so recipe ideas and shopping lists stay accurate.
+                </p>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show col-lg-10 mx-auto" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-5">
+                <div class="pantry-card card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h2 class="h5 mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Add an item</h2>
+                        <form method="post" action="{% url 'pantry' %}{% if category_filter %}?category={{ category_filter }}{% endif %}" novalidate>
+                            {% csrf_token %}
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                            {% endif %}
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}<div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}<div class="invalid-feedback d-block">{{ form.category.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label">Amount <span class="text-muted fw-normal">(optional)</span></label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}<div class="invalid-feedback d-block">{{ form.quantity.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                                {{ form.notes }}
+                                {% if form.notes.errors %}<div class="invalid-feedback d-block">{{ form.notes.errors.0 }}</div>{% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-hero-primary w-100">Add to pantry</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="pantry-card card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <h2 class="h5 mb-0"><i class="bi bi-basket3 text-primary me-2"></i>Inventory</h2>
+                            <span class="text-muted small">{{ items|length }} item{{ items|length|pluralize }} shown</span>
+                        </div>
+
+                        <div class="pantry-filters d-flex flex-wrap gap-2 mb-4">
+                            <a href="{% url 'pantry' %}"
+                               class="btn btn-sm pantry-filter-pill {% if not category_filter %}active{% endif %}">All</a>
+                            {% for value, label, count in category_rows %}
+                                <a href="{% url 'pantry' %}?category={{ value }}"
+                                   class="btn btn-sm pantry-filter-pill {% if category_filter == value %}active{% endif %}">
+                                    {{ label }}
+                                    <span class="badge rounded-pill ms-1 pantry-filter-badge">{{ count }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+
+                        {% if not items %}
+                            <div class="pantry-empty text-center text-muted py-5">
+                                <i class="bi bi-inbox display-4 d-block mb-3 opacity-50"></i>
+                                <p class="mb-0">Nothing here yet. Add your first ingredient on the left.</p>
+                            </div>
+                        {% else %}
+                            <ul class="list-group list-group-flush pantry-item-list">
+                                {% for item in items %}
+                                    <li class="list-group-item px-0 py-3 pantry-item-row">
+                                        <div class="d-flex justify-content-between align-items-start gap-3">
+                                            <div>
+                                                <div class="fw-semibold">{{ item.name }}</div>
+                                                <div class="small text-muted">{{ item.get_category_display }}</div>
+                                                {% if item.quantity %}
+                                                    <div class="small mt-1"><span class="text-muted">Amount:</span> {{ item.quantity }}</div>
+                                                {% endif %}
+                                                {% if item.notes %}
+                                                    <div class="small mt-1 text-muted">{{ item.notes }}</div>
+                                                {% endif %}
+                                            </div>
+                                            <form method="post" action="{% url 'pantry' %}{% if category_filter %}?category={{ category_filter }}{% endif %}" class="ms-2">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="item_id" value="{{ item.pk }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Remove">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

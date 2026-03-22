@@ -84,6 +84,8 @@ INSTALLED_APPS = (
     + _LOCAL_APPS
 )
 
+LOGIN_URL = "/users/login/"
+
 ALLAUTH_ENABLED = _has_module("allauth")
 
 if ALLAUTH_ENABLED:

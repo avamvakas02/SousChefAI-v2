@@ -1,364 +1,86 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login / Register — SousChef AI{% endblock %}
+{% block title %}SousChefAI/Login{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
-
-<!-- ===== AUTH SECTION ===== -->
 <section id="auth-section">
     <div class="container">
         <div class="row justify-content-center align-items-center min-vh-auth">
             <div class="col-lg-10">
-
                 <div class="auth-wrapper">
                     <div class="row g-0">
-
-                        <!-- LEFT PANEL — Decorative Side -->
                         <div class="col-lg-5 auth-left d-none d-lg-flex">
                             <div class="auth-left-content">
-                                <img src="{% static 'images/logo.png' %}" 
-                                     alt="SousChef AI" 
-                                     class="auth-logo">
-                                <h2>Welcome To Your Kitchen Companion</h2>
-                                <p>Join thousands of home cooks discovering smarter ways to cook with AI.</p>
-
-                                <div class="auth-features">
-                                    <div class="auth-feature-item">
-                                        <span></span> Smart pantry management
-                                    </div>
-                                    <div class="auth-feature-item">
-                                        <span></span> 50,000+ recipes to explore
-                                    </div>
-                                    <div class="auth-feature-item">
-                                        <span></span> AI-powered cooking guidance
-                                    </div>
-                                    <div class="auth-feature-item">
-                                        <span></span> Interactive kitchen mode
-                                    </div>
-                                </div>
+                                <img src="{% static 'images/logo.png' %}" alt="SousChef AI" class="auth-logo">
+                                <h2>Welcome Back</h2>
+                                <p>Log in to continue your smart cooking journey.</p>
                             </div>
                         </div>
 
-                        <!-- RIGHT PANEL — Forms Side -->
                         <div class="col-lg-7 auth-right">
-
-                            <!-- Tab Switcher -->
-                            <div class="auth-tabs">
-                                <button class="auth-tab active" id="loginTab" onclick="switchTab('login')">
-                                    Login
-                                </button>
-                                <button class="auth-tab" id="registerTab" onclick="switchTab('register')">
-                                    Register
-                                </button>
-                            </div>
-
                             {% if messages %}
                                 <div class="px-4 pt-3">
                                     {% for message in messages %}
-                                        <div class="alert alert-{{ message.tags }} mb-2" role="alert">
-                                            {{ message }}
-                                        </div>
+                                        <div class="alert alert-{{ message.tags }} mb-2" role="alert">{{ message }}</div>
                                     {% endfor %}
                                 </div>
                             {% endif %}
 
-                            <!-- ===== LOGIN FORM ===== -->
-                            <div class="auth-form-wrapper" id="loginForm">
+                            <div class="auth-form-wrapper">
                                 <div class="auth-form-header">
-                                    <h3>Welcome Back</h3>
-                                    <p>Log in to access your pantry and saved recipes</p>
+                                    <h3>Login</h3>
+                                    <p>Access your pantry and saved recipes</p>
                                 </div>
 
-                                <form method="POST" action="{% url 'login' %}" id="loginFormEl">
+                                <form method="POST" action="{% url 'login' %}">
                                     {% csrf_token %}
-                                    <input type="hidden" name="form_type" value="login">
-
-                                    <!-- Username Field -->
+                                    {% if next %}
+                                        <input type="hidden" name="next" value="{{ next }}">
+                                    {% endif %}
                                     <div class="form-group mb-3">
                                         <label class="form-label">Username</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">👤</span>
-                                            <input type="text" 
-                                                   name="username" 
-                                                   class="form-control auth-input" 
-                                                   placeholder="Enter your username"
-                                                   required>
+                                            <input type="text" name="username" class="form-control auth-input" placeholder="Enter your username" required>
                                         </div>
                                     </div>
 
-                                    <!-- Password Field -->
-                                    <div class="form-group mb-3">
+                                    <div class="form-group mb-4">
                                         <label class="form-label">Password</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">🔒</span>
-                                            <input type="password" 
-                                                   name="password" 
-                                                   class="form-control auth-input" 
-                                                   id="loginPassword"
-                                                   placeholder="Enter your password"
-                                                   required>
+                                            <input type="password" name="password" class="form-control auth-input" id="loginPassword" placeholder="Enter your password" required>
                                             <span class="input-toggle" onclick="togglePassword('loginPassword')">👁️</span>
                                         </div>
                                     </div>
 
-                                    <!-- Remember Me -->
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="rememberMe">
-                                            <label class="form-check-label" for="rememberMe">
-                                                Remember me
-                                            </label>
-                                        </div>
-                                        <a href="#" class="forgot-link">Forgot password?</a>
-                                    </div>
-
-                                    <!-- Submit Button -->
-                                    <button type="submit" class="btn btn-auth w-100">
-                                        Login to SousChef AI
-                                    </button>
-
+                                    <button type="submit" class="btn btn-auth w-100">Login to SousChef AI</button>
                                 </form>
 
                                 <p class="auth-switch-text">
-                                    Don't have an account? 
-                                    <span onclick="switchTab('register')" class="auth-switch-link">
-                                        Sign up for free
-                                    </span>
+                                    Don't have an account?
+                                    <a href="{% url 'register' %}" class="auth-switch-link">Sign up for free</a>
                                 </p>
                             </div>
-
-                            <!-- ===== REGISTER FORM ===== -->
-                            <div class="auth-form-wrapper hidden" id="registerForm">
-                                <div class="auth-form-header">
-                                    <h3>Create Your Account 🍳</h3>
-                                    <p>Join SousChef AI and start cooking smarter</p>
-                                </div>
-
-                                {% if social_auth_enabled %}
-                                    <div class="px-4 pb-2">
-                                        <a class="btn btn-outline-dark w-100 mb-2" href="/accounts/google/login/">
-                                            Continue with Google
-                                        </a>
-                                        <a class="btn btn-outline-primary w-100 mb-3" href="/accounts/facebook/login/">
-                                            Continue with Facebook
-                                        </a>
-                                        <div class="text-center text-muted small mb-3">or sign up with email</div>
-                                    </div>
-                                {% endif %}
-
-                                <form method="POST" action="{% url 'login' %}" id="registerFormEl">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="form_type" value="register">
-
-                                    <!-- Name Row -->
-                                    <div class="row g-3 mb-3">
-                                        <div class="col-6">
-                                            <label class="form-label">First Name</label>
-                                            <div class="input-wrapper">
-                                                <span class="input-icon">✏️</span>
-                                                <input type="text" 
-                                                       name="first_name" 
-                                                       class="form-control auth-input" 
-                                                       placeholder="First name"
-                                                       required>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label">Last Name</label>
-                                            <div class="input-wrapper">
-                                                <span class="input-icon">✏️</span>
-                                                <input type="text" 
-                                                       name="last_name" 
-                                                       class="form-control auth-input" 
-                                                       placeholder="Last name"
-                                                       required>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Username -->
-                                    <div class="form-group mb-3">
-                                        <label class="form-label">Username</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-icon">👤</span>
-                                            <input type="text" 
-                                                   name="username" 
-                                                   class="form-control auth-input" 
-                                                   placeholder="Choose a username"
-                                                   required>
-                                        </div>
-                                    </div>
-
-                                    <!-- Email -->
-                                    <div class="form-group mb-3">
-                                        <label class="form-label">Email Address</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-icon">📧</span>
-                                            <input type="email" 
-                                                   name="email" 
-                                                   class="form-control auth-input" 
-                                                   placeholder="your@email.com"
-                                                   required>
-                                        </div>
-                                    </div>
-
-                                    <!-- Password -->
-                                    <div class="form-group mb-3">
-                                        <label class="form-label">Password</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-icon">🔒</span>
-                                            <input type="password" 
-                                                   name="password1" 
-                                                   class="form-control auth-input" 
-                                                   id="registerPassword"
-                                                   placeholder="Create a strong password"
-                                                   required>
-                                            <span class="input-toggle" onclick="togglePassword('registerPassword')">👁️</span>
-                                        </div>
-                                        <!-- Password Strength Bar -->
-                                        <div class="password-strength mt-2">
-                                            <div class="strength-bar" id="strengthBar"></div>
-                                        </div>
-                                        <small class="strength-text" id="strengthText"></small>
-                                    </div>
-
-                                    <!-- Confirm Password -->
-                                    <div class="form-group mb-3">
-                                        <label class="form-label">Confirm Password</label>
-                                        <div class="input-wrapper">
-                                            <span class="input-icon">🔒</span>
-                                            <input type="password" 
-                                                   name="password2" 
-                                                   class="form-control auth-input" 
-                                                   id="confirmPassword"
-                                                   placeholder="Repeat your password"
-                                                   required>
-                                            <span class="match-indicator" id="matchIndicator"></span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Skill Level -->
-                                    <div class="form-group mb-4">
-                                        <label class="form-label">Your Cooking Skill Level</label>
-                                        <div class="skill-selector">
-                                            <input type="radio" name="skill_level" id="beginner" value="beginner" checked class="skill-radio">
-                                            <label for="beginner" class="skill-option">
-                                                <span>🥄</span> Beginner
-                                            </label>
-
-                                            <input type="radio" name="skill_level" id="intermediate" value="intermediate" class="skill-radio">
-                                            <label for="intermediate" class="skill-option">
-                                                <span>🍳</span> Intermediate
-                                            </label>
-
-                                            <input type="radio" name="skill_level" id="advanced" value="advanced" class="skill-radio">
-                                            <label for="advanced" class="skill-option">
-                                                <span>👨‍🍳</span> Advanced
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <!-- Submit -->
-                                    <button type="submit" class="btn btn-auth w-100">
-                                        Create My Account
-                                    </button>
-
-                                </form>
-
-                                <p class="auth-switch-text">
-                                    Already have an account? 
-                                    <span onclick="switchTab('login')" class="auth-switch-link">
-                                        Log in here
-                                    </span>
-                                </p>
-
-                            </div>
-                            <!-- END RIGHT PANEL -->
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </section>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// ===== TAB SWITCHER =====
-function switchTab(tab) {
-    const loginForm    = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const loginTab     = document.getElementById('loginTab');
-    const registerTab  = document.getElementById('registerTab');
-
-    if (tab === 'login') {
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        loginTab.classList.add('active');
-        registerTab.classList.remove('active');
-    } else {
-        registerForm.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-        registerTab.classList.add('active');
-        loginTab.classList.remove('active');
-    }
-}
-
-// Open the correct tab after server response
-(function () {
-    const activeTab = "{{ active_tab|default:'login' }}";
-    if (activeTab === "register") {
-        switchTab("register");
-    } else {
-        switchTab("login");
-    }
-})();
-
-// ===== SHOW/HIDE PASSWORD =====
 function togglePassword(fieldId) {
-    const field = document.getElementById(fieldId);
+    const field = document.querySelector(`#${fieldId}`);
     field.type = field.type === 'password' ? 'text' : 'password';
 }
-
-// ===== PASSWORD STRENGTH CHECKER =====
-document.getElementById('registerPassword').addEventListener('input', function() {
-    const val       = this.value;
-    const bar       = document.getElementById('strengthBar');
-    const text      = document.getElementById('strengthText');
-    let strength    = 0;
-
-    if (val.length >= 8)              strength++;
-    if (/[A-Z]/.test(val))           strength++;
-    if (/[0-9]/.test(val))           strength++;
-    if (/[^A-Za-z0-9]/.test(val))   strength++;
-
-    const levels = ['', 'weak', 'fair', 'good', 'strong'];
-    const labels = ['', '⚠️ Weak', '🔶 Fair', '✅ Good', '💪 Strong'];
-
-    bar.className  = 'strength-bar ' + (levels[strength] || '');
-    text.textContent = labels[strength] || '';
-});
-
-// ===== PASSWORD MATCH CHECKER =====
-document.getElementById('confirmPassword').addEventListener('input', function() {
-    const pass1     = document.getElementById('registerPassword').value;
-    const indicator = document.getElementById('matchIndicator');
-
-    if (this.value === '') {
-        indicator.textContent = '';
-    } else if (this.value === pass1) {
-        indicator.textContent = '✅';
-    } else {
-        indicator.textContent = '❌';
-    }
-});
 </script>
 {% endblock %}

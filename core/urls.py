@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('pages.urls')),
     path('users/', include('users.urls')),
+    path('pantry/', include('pantry.urls')),
 ]
 
 if getattr(settings, "ALLAUTH_ENABLED", False):
