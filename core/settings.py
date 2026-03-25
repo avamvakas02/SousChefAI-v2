@@ -211,3 +211,19 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Gemini AI
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
+# Pantry ingredient catalog (TheMealDB list API; no key required)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "souschef-pantry-cache",
+    }
+}
+PANTRY_USE_INGREDIENT_API = os.getenv("PANTRY_USE_INGREDIENT_API", "True") == "True"
+PANTRY_INGREDIENT_LIST_URL = os.getenv(
+    "PANTRY_INGREDIENT_LIST_URL",
+    "https://www.themealdb.com/api/json/v1/1/list.php?i=list",
+)
+PANTRY_MAX_INGREDIENTS_PER_ZONE = int(os.getenv("PANTRY_MAX_INGREDIENTS_PER_ZONE", "100"))
+# Thumbnails: TheMealDB CDN (same project as ingredient list); see ingredient_service.themealdb_ingredient_image_url
+PANTRY_SHOW_INGREDIENT_IMAGES = os.getenv("PANTRY_SHOW_INGREDIENT_IMAGES", "True") == "True"
+
