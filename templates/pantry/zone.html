@@ -3,6 +3,10 @@
 
 {% block title %}{{ zone.title }}SousChefAI/Pantry{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="pantry-app pantry-zone-page pantry-zone-page--{{ zone.theme }}">
     <section class="pantry-app-hero border-bottom">
@@ -89,4 +93,8 @@
         </p>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pantry.js' %}"></script>
 {% endblock %}

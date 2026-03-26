@@ -2,12 +2,11 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
 
 from .models import UserProfile
-
-import importlib.util
 
 
 def _safe_post(request, key: str) -> str:
@@ -25,10 +24,7 @@ def _safe_next(request) -> str:
     return ""
 
 def _social_auth_enabled() -> bool:
-    try:
-        return importlib.util.find_spec("allauth") is not None
-    except ModuleNotFoundError:
-        return False
+    return bool(getattr(settings, "ALLAUTH_ENABLED", False))
 
 
 @require_http_methods(["GET", "POST"])

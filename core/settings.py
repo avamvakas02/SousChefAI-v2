@@ -35,6 +35,18 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app']
 
+# Behind Railway / Heroku / Render, the edge terminates TLS; without this, Django
+# thinks the request is HTTP and builds http:// OAuth redirect_uri values — Facebook
+# Login then shows "isn't using a secure connection".
+_trust_proxy_tls = os.getenv("TRUST_PROXY_TLS", "").strip().lower() in (
+    "1",
+    "true",
+    "yes",
+)
+if _trust_proxy_tls or os.getenv("RAILWAY_ENVIRONMENT"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 
@@ -99,10 +111,62 @@ if ALLAUTH_ENABLED:
     LOGIN_REDIRECT_URL = "/"
     LOGOUT_REDIRECT_URL = "/"
 
-    ACCOUNT_AUTHENTICATION_METHOD = "username"
-    ACCOUNT_USERNAME_REQUIRED = True
-    ACCOUNT_EMAIL_REQUIRED = True
+    # Force https in OAuth callback URLs when not debugging (safety net if proxy
+    # headers are missing). Override locally with ACCOUNT_DEFAULT_HTTP_PROTOCOL=http.
+    _acct_proto = os.getenv("ACCOUNT_DEFAULT_HTTP_PROTOCOL", "").strip().lower()
+    if _acct_proto in ("http", "https"):
+        ACCOUNT_DEFAULT_HTTP_PROTOCOL = _acct_proto
+    elif not DEBUG:
+        ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+
+    ACCOUNT_LOGIN_METHODS = {"username", "email"}
+    ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
     ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
+
+    # Social login (Google / Facebook). Prefer env-based credentials; you can
+    # alternatively add a Social application in Django admin.
+    _google_client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip()
+    _google_client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
+    _facebook_client_id = os.getenv("FACEBOOK_OAUTH_CLIENT_ID", "").strip()
+    _facebook_client_secret = os.getenv("FACEBOOK_OAUTH_CLIENT_SECRET", "").strip()
+
+    SOCIALACCOUNT_PROVIDERS = {
+        "google": {
+            "SCOPE": ["profile", "email"],
+            "AUTH_PARAMS": {"access_type": "online"},
+        },
+        "facebook": {
+            "METHOD": "oauth2",
+            "SCOPE": ["email", "public_profile"],
+            "FIELDS": [
+                "id",
+                "first_name",
+                "last_name",
+                "middle_name",
+                "name",
+                "name_format",
+                "picture",
+                "short_name",
+                "email",
+            ],
+        },
+    }
+    if _google_client_id and _google_client_secret:
+        SOCIALACCOUNT_PROVIDERS["google"]["APP"] = {
+            "client_id": _google_client_id,
+            "secret": _google_client_secret,
+            "key": "",
+        }
+    if _facebook_client_id and _facebook_client_secret:
+        SOCIALACCOUNT_PROVIDERS["facebook"]["APP"] = {
+            "client_id": _facebook_client_id,
+            "secret": _facebook_client_secret,
+        }
+
+    # Prefer explicit resolution when both env and DB Social applications exist (see users.adapters).
+    SOCIALACCOUNT_ADAPTER = "users.adapters.SocialAccountAdapter"
+    # Skip allauth's intermediate "Sign In Via … / Continue" page; start OAuth immediately (uses site's base styling on your pages only).
+    SOCIALACCOUNT_LOGIN_ON_GET = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,0 +1,367 @@
+﻿/* ========================================
+   HERO SECTION
+======================================== */
+#hero {
+    background-color: var(--bg-cream);
+    padding: 5rem 0;
+}
+
+.min-vh-80 {
+    min-height: 80vh;
+}
+
+.hero-badge {
+    display: inline-block;
+    background-color: var(--bg-warm);
+    color: var(--primary);
+    border: 1px solid var(--primary-light);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.hero-highlight {
+    color: var(--primary);
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-medium);
+    margin-bottom: 2rem;
+    max-width: 480px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-hero-secondary {
+    border-radius: 30px;
+}
+
+.hero-image-wrapper {
+    position: relative;
+    text-align: center;
+    padding: 2rem;
+}
+
+.hero-image {
+    width: 100%;
+    border-radius: 20px;
+}
+
+.hero-image-wrapper--right {
+    text-align: right;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto;
+}
+
+.hero-image--cover {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    object-position: center;
+    box-shadow: 0 15px 40px var(--shadow);
+}
+
+.hero-floating-card {
+    position: absolute;
+    background: var(--white);
+    padding: 0.6rem 1.2rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px var(--shadow);
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.card-1 { top: 15%; left: 0; }
+.card-2 { bottom: 20%; right: 0; }
+
+/* Hero placeholder grid (when hero image is not used) */
+.hero-placeholder-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+}
+
+.hero-placeholder-main {
+    grid-row: 1 / 3;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+    box-shadow: 0 15px 40px var(--shadow);
+}
+
+.hero-placeholder-sub {
+    border-radius: 16px;
+    background-color: var(--white);
+    box-shadow: 0 8px 25px var(--shadow);
+}
+
+.hero-placeholder-top {
+    background: linear-gradient(135deg, var(--bg-warm), var(--accent));
+}
+
+.hero-placeholder-bottom {
+    background: linear-gradient(135deg, var(--secondary), var(--primary-dark));
+}
+
+/* ========================================
+   SECTION SHARED STYLES
+======================================== */
+.section-header {
+    margin-bottom: 3rem;
+}
+
+.section-header h2 {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.section-header p {
+    color: var(--text-medium);
+    font-size: 1.05rem;
+}
+
+/* ========================================
+   FEATURES SECTION
+======================================== */
+#features {
+    padding: 5rem 0;
+    background-color: var(--bg-warm);
+}
+
+.persona-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.persona-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px var(--shadow);
+    border-color: var(--primary-light);
+}
+
+.persona-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem auto;
+    border-radius: 50%;
+    border: 3px solid rgba(200, 96, 42, 0.6);
+    padding: 3px;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px var(--shadow);
+}
+
+.persona-icon-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+#personas {
+    padding: 5rem 0;
+    background-color: var(--bg-cream);
+}
+
+.feature-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px var(--shadow);
+    border-color: var(--primary-light);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.feature-icon-image {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    display: inline-block;
+}
+
+.feature-card h5 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    color: var(--text-dark);
+}
+
+.feature-card p {
+    color: var(--text-medium);
+    font-size: 0.95rem;
+}
+
+/* ========================================
+   HOW IT WORKS
+======================================== */
+#how-it-works {
+    padding: 5rem 0;
+    background-color: var(--bg-cream);
+}
+
+.step-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    height: 100%;
+    border-top: 4px solid var(--primary);
+    transition: transform 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+}
+
+.step-number {
+    font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-light);
+    margin-bottom: 1rem;
+    line-height: 1;
+}
+
+.step-card h5 {
+    margin-bottom: 0.8rem;
+}
+
+.step-card p {
+    color: var(--text-medium);
+    font-size: 0.95rem;
+}
+
+/* ========================================
+   STATS BANNER
+======================================== */
+#stats {
+    padding: 4rem 0;
+    background-color: var(--primary);
+}
+
+.stats-wrapper {
+    padding: 1rem 0;
+}
+
+.stat-item h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.3rem;
+}
+
+.stat-item p {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ========================================
+   SUPPORT & SAFETY NET
+======================================== */
+#support {
+    padding: 4rem 0;
+    background-color: var(--bg-cream);
+}
+
+.support-wrapper {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+.support-wrapper h2 {
+    margin-bottom: 0.75rem;
+}
+
+.support-wrapper p {
+    color: var(--text-medium);
+    margin: 0;
+}
+
+.support-pill {
+    background-color: var(--bg-warm);
+    color: var(--text-dark);
+    border-radius: 999px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 14px var(--shadow);
+}
+
+/* ========================================
+   CALL TO ACTION
+======================================== */
+#cta {
+    padding: 5rem 0;
+    background-color: var(--bg-warm);
+}
+
+.cta-wrapper {
+    background: var(--white);
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    box-shadow: 0 10px 40px var(--shadow);
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+.cta-wrapper h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+}
+
+.cta-wrapper p {
+    color: var(--text-medium);
+    margin-bottom: 2rem;
+}
+
+.btn-cta {
+    font-size: 1.05rem;
+    display: inline-block;
+}
+
+.cta-actions {
+    margin-top: 1rem;
+}

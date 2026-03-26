@@ -1,0 +1,13 @@
+{% load static %}
+{% load socialaccount %}
+<div class="px-4 pb-2">
+    <a class="btn btn-outline-dark w-100 mb-2 d-inline-flex align-items-center justify-content-center gap-2" href="{% provider_login_url 'google' process='signup' %}">
+        Sign Up with:
+        <img src="{% static 'images/icons/google.png' %}" alt="Google" style="width: 18px; height: 18px; object-fit: contain;">
+    </a>
+    <a class="btn btn-outline-primary w-100 mb-3 d-inline-flex align-items-center justify-content-center gap-2" href="{% provider_login_url 'facebook' process='signup' %}">
+        Sign Up with:
+        <img src="{% static 'images/icons/facebook.png' %}" alt="Facebook" style="width: 18px; height: 18px; object-fit: contain;">
+    </a>
+    <div class="text-center text-muted small mb-3">or sign up with email</div>
+</div>

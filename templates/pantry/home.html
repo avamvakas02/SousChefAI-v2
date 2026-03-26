@@ -3,6 +3,10 @@
 
 {% block title %}SousChefAI/Pantry{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="pantry-app">
     <section class="pantry-app-hero border-bottom">
@@ -65,11 +69,40 @@
                 {% for z in zones %}
                     <div class="col-md-6 col-xl-4">
                         <a href="{% url 'pantry_zone' z.slug %}" class="pantry-cat-card pantry-cat-card--{{ z.theme }}">
-                            <div class="pantry-cat-card-top">
-                                <div class="pantry-cat-card-icon" aria-hidden="true">
-                                    <i class="bi {{ z.icon }}"></i>
+                            {% if z.slug == 'produce' %}
+                                <div class="pantry-cat-card-cover" aria-hidden="true">
+                                    <img
+                                        src="{% static 'images/produce.jpg' %}"
+                                        alt=""
+                                        class="pantry-cat-card-cover-img"
+                                        loading="lazy"
+                                    >
                                 </div>
-                                <span class="pantry-cat-card-meta">{{ z.keys|length }} ingredients</span>
+                            {% elif z.slug == 'dairy_proteins' %}
+                                <div class="pantry-cat-card-cover" aria-hidden="true">
+                                    <img
+                                        src="{% static 'images/diary & proteins.jpg' %}"
+                                        alt=""
+                                        class="pantry-cat-card-cover-img"
+                                        loading="lazy"
+                                    >
+                                </div>
+                            {% elif z.slug == 'pantry_staples' %}
+                                <div class="pantry-cat-card-cover" aria-hidden="true">
+                                    <img
+                                        src="{% static 'images/pantry-staples.jpg' %}"
+                                        alt=""
+                                        class="pantry-cat-card-cover-img"
+                                        loading="lazy"
+                                    >
+                                </div>
+                            {% endif %}
+                            <div class="pantry-cat-card-top">
+                                {% if z.slug != 'produce' and z.slug != 'dairy_proteins' and z.slug != 'pantry_staples' %}
+                                    <div class="pantry-cat-card-icon" aria-hidden="true">
+                                        <i class="bi {{ z.icon }}"></i>
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="pantry-cat-card-body">
                                 <h3 class="pantry-cat-card-title">{{ z.title }}</h3>
@@ -167,4 +200,8 @@
         </section>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pantry.js' %}"></script>
 {% endblock %}

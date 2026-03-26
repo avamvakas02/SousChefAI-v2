@@ -38,17 +38,7 @@
                                 </div>
 
                                 {% if social_auth_enabled %}
-                                    <div class="px-4 pb-2">
-                                        <a class="btn btn-outline-dark w-100 mb-2 d-inline-flex align-items-center justify-content-center gap-2" href="/accounts/google/login/">
-                                            Sign Up with:
-                                            <img src="{% static 'images/icons/google.png' %}" alt="Google" style="width: 18px; height: 18px; object-fit: contain;">
-                                        </a>
-                                        <a class="btn btn-outline-primary w-100 mb-3 d-inline-flex align-items-center justify-content-center gap-2" href="/accounts/facebook/login/">
-                                            Sign Up with:
-                                            <img src="{% static 'images/icons/facebook.png' %}" alt="Facebook" style="width: 18px; height: 18px; object-fit: contain;">
-                                        </a>
-                                        <div class="text-center text-muted small mb-3">or sign up with email</div>
-                                    </div>
+                                    {% include "users/partials/register_social_buttons.html" %}
                                 {% endif %}
 
                                 <form method="POST" action="{% url 'register' %}">
@@ -83,7 +73,9 @@
                                     <div class="form-group mb-3">
                                         <label class="form-label">Email Address</label>
                                         <div class="input-wrapper">
-                                            <span class="input-icon">📧</span>
+                                            <span class="input-icon">
+                                                <img src="{% static 'images/icons/email.png' %}" alt="Email" style="width: 16px; height: 16px; object-fit: contain;">
+                                            </span>
                                             <input type="email" name="email" class="form-control auth-input" placeholder="your@email.com" required>
                                         </div>
                                     </div>
@@ -92,10 +84,10 @@
                                         <label class="form-label">Password</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">
-                                                <img src="{% static 'images/icons/pasword.png' %}" alt="Password" style="width: 16px; height: 16px; object-fit: contain;">
+                                                <img src="{% static 'images/icons/password.png' %}" alt="Password" style="width: 16px; height: 16px; object-fit: contain;">
                                             </span>
                                             <input type="password" name="password1" class="form-control auth-input" id="registerPassword" placeholder="Create a strong password" required>
-                                            <span class="input-toggle" onclick="togglePassword('registerPassword')">👁️</span>
+                                            <span class="input-toggle" data-password-target="registerPassword" role="button" tabindex="0" aria-label="Show or hide password">👁️</span>
                                         </div>
                                         <div class="password-strength mt-2">
                                             <div class="strength-bar" id="strengthBar"></div>
@@ -144,33 +136,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function togglePassword(fieldId) {
-    const field = document.querySelector(`#${fieldId}`);
-    field.type = field.type === 'password' ? 'text' : 'password';
-}
-
-document.querySelector('#registerPassword').addEventListener('input', function() {
-    const val = this.value;
-    const bar = document.querySelector('#strengthBar');
-    const text = document.querySelector('#strengthText');
-    let strength = 0;
-    if (val.length >= 8) strength++;
-    if (/[A-Z]/.test(val)) strength++;
-    if (/[0-9]/.test(val)) strength++;
-    if (/[^A-Za-z0-9]/.test(val)) strength++;
-    const levels = ['', 'weak', 'fair', 'good', 'strong'];
-    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
-    bar.className = 'strength-bar ' + (levels[strength] || '');
-    text.textContent = labels[strength] || '';
-});
-
-document.querySelector('#confirmPassword').addEventListener('input', function() {
-    const pass1 = document.querySelector('#registerPassword').value;
-    const indicator = document.querySelector('#matchIndicator');
-    if (this.value === '') indicator.textContent = '';
-    else if (this.value === pass1) indicator.textContent = '✓';
-    else indicator.textContent = '✗';
-});
-</script>
+<script src="{% static 'js/auth.js' %}"></script>
 {% endblock %}

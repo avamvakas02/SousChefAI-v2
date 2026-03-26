@@ -55,7 +55,7 @@
                                         <div class="input-wrapper">
                                             <span class="input-icon">🔒</span>
                                             <input type="password" name="password" class="form-control auth-input" id="loginPassword" placeholder="Enter your password" required>
-                                            <span class="input-toggle" onclick="togglePassword('loginPassword')">👁️</span>
+                                            <span class="input-toggle" data-password-target="loginPassword" role="button" tabindex="0" aria-label="Show or hide password">👁️</span>
                                         </div>
                                     </div>
 
@@ -77,10 +77,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function togglePassword(fieldId) {
-    const field = document.querySelector(`#${fieldId}`);
-    field.type = field.type === 'password' ? 'text' : 'password';
-}
-</script>
+<script src="{% static 'js/auth.js' %}"></script>
 {% endblock %}

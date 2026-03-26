@@ -30,9 +30,14 @@
 }
 
 .auth-left::before {
-    content: '🍳';
+    content: '';
     position: absolute;
-    font-size: 12rem;
+    width: 12rem;
+    height: 12rem;
+    background-image: url('../images/icons/steak.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
     opacity: 0.05;
     bottom: -2rem;
     right: -2rem;

@@ -1,0 +1,190 @@
+﻿/* ========================================
+   IMPORT GOOGLE FONTS
+======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+/* ========================================
+   COLOUR PALETTE â€” WARM & COZY
+======================================== */
+:root {
+    --primary:       #C8602A;   /* Warm terracotta orange */
+    --primary-dark:  #A0471C;   /* Deeper burnt orange */
+    --primary-light: #E8845A;   /* Soft peach orange */
+    --secondary:     #4A7C59;   /* Sage green */
+    --accent:        #E9C46A;   /* Golden yellow */
+    --bg-cream:      #FDF6EC;   /* Warm cream background */
+    --bg-warm:       #F5ECD7;   /* Slightly deeper cream */
+    --text-dark:     #2C1810;   /* Deep warm brown */
+    --text-medium:   #5C3D2E;   /* Medium brown */
+    --text-light:    #8B6F5E;   /* Light warm grey-brown */
+    --white:         #FFFFFF;
+    --shadow:        rgba(44, 24, 16, 0.1);
+}
+
+/* ========================================
+   BASE STYLES
+======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: var(--bg-cream);
+    color: var(--text-dark);
+    line-height: 1.7;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-dark);
+}
+
+
+/* ========================================
+   NAVBAR
+======================================== */
+#mainNavbar {
+    background-color: var(--bg-cream);
+    border-bottom: 2px solid var(--bg-warm);
+    padding: 1rem 0;
+    box-shadow: 0 2px 15px var(--shadow);
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important; /* keep navbar clickable above any overlay */
+    pointer-events: auto !important;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-logo {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
+}
+
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    color: var(--text-medium);
+    font-size: 1.05rem;
+    padding: 0.5rem 0.8rem;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary);
+}
+
+#mainNavbar,
+#mainNavbar * {
+    pointer-events: auto !important;
+}
+
+/* Shared primary button style (all app buttons) */
+.btn-hero-primary,
+.btn-hero-secondary,
+.btn-cta,
+.nav-cta {
+    background-color: var(--primary);
+    color: var(--white) !important;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 18px var(--shadow);
+}
+
+.btn-hero-primary,
+.btn-hero-secondary,
+.btn-cta {
+    padding: 0.8rem 2rem;
+}
+
+.nav-cta {
+    padding: 0.6rem 1.8rem !important;
+}
+
+.btn-hero-primary:hover,
+.btn-hero-secondary:hover,
+.btn-cta:hover,
+.nav-cta:hover {
+    background-color: var(--primary-dark);
+    color: var(--white) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px var(--shadow);
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+#mainFooter {
+    background-color: var(--text-dark);
+    color: var(--bg-warm);
+    padding: 3rem 0 0 0;
+    margin-top: 4rem;
+}
+
+/* Force footer logo to match header logo size/color */
+#mainFooter .footer-logo {
+    height: 70px !important;
+    width: auto !important;
+    object-fit: contain;
+    filter: none !important;
+}
+
+.footer-logo {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
+
+.footer-tagline {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.footer-heading {
+    color: var(--accent);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--accent);
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--text-medium);
+    margin-top: 2rem;
+    padding: 1.2rem 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
