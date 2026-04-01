@@ -4,6 +4,7 @@ from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
+import re
 
 from .ingredient_service import (
     get_catalog,
@@ -25,21 +26,141 @@ def _owned_names_lower(user):
 def _presets_for_zone(user, zone):
     owned = _owned_names_lower(user)
     rows = []
+    # API results can contain duplicates (same ingredient under different ids).
+    # Deduplicate by display name (and image URL when available) to prevent repeated tiles in the template.
+    seen_names = set()
+    seen_images = set()
     for key in zone["keys"]:
         parsed = lookup_preset(key)
         if not parsed:
             continue
         _, name = parsed
+        name_norm = (name or "").strip().lower()
+        if not name_norm or name_norm in seen_names:
+            continue
+
+        img_url = ingredient_image_url(name)
+        if img_url and img_url in seen_images:
+            # Sometimes the catalog contains near-duplicates that differ in name
+            # but resolve to the same thumbnail (same TheMealDB slug).
+            continue
+
+        seen_names.add(name_norm)
+        if img_url:
+            seen_images.add(img_url)
         rows.append(
             {
                 "key": key,
                 "name": name,
                 "icon": resolve_icon(key, name),
-                "image_url": ingredient_image_url(name),
-                "already_added": name.lower() in owned,
+                "image_url": img_url,
+                "already_added": name_norm in owned,
             }
         )
     return rows
+
+
+_GROUP_ALIASES = (
+    ("tomatoes", ("tomato", "tomatoes")),
+    ("apples", ("apple", "apples")),
+    ("onions", ("onion", "onions")),
+    ("potatoes", ("potato", "potatoes")),
+    ("peppers", ("pepper", "peppers", "chili", "chillies", "chilies")),
+    ("lemons", ("lemon", "lemons")),
+    ("limes", ("lime", "limes")),
+    ("bananas", ("banana", "bananas")),
+    ("mushrooms", ("mushroom", "mushrooms")),
+    ("beans", ("bean", "beans")),
+    ("lettuce", ("lettuce",)),
+    ("basil", ("basil",)),
+    ("garlic", ("garlic",)),
+    ("carrots", ("carrot", "carrots")),
+    ("asparagus", ("asparagus",)),
+    ("eggs", ("egg", "eggs")),
+    ("milk", ("milk",)),
+    ("cheese", ("cheese", "cheddar", "mozzarella", "feta", "parmesan")),
+    ("chicken", ("chicken",)),
+    ("beef", ("beef",)),
+    ("pork", ("pork", "bacon", "ham")),
+    ("fish", ("fish", "salmon", "tuna", "cod", "sardine", "anchovy", "trout")),
+    ("oils", ("oil", "olive oil", "vegetable oil")),
+    ("vinegars", ("vinegar", "vinegars")),
+    ("rice", ("rice",)),
+    ("pasta", ("pasta",)),
+    ("flour", ("flour",)),
+    ("sugar", ("sugar",)),
+    ("salt", ("salt",)),
+)
+CATALOG_INITIAL_VISIBLE = 15
+CATALOG_SHOW_MORE_STEP = 16
+
+
+def _group_heading_for_name(name: str) -> str:
+    """
+    Return a human-friendly group heading for an ingredient name.
+    Example: "Baby Plum Tomatoes" -> "Tomatoes"
+    """
+    lowered = (name or "").strip().lower()
+    if not lowered:
+        return "Other ingredients"
+
+    # Normalize punctuation/hyphen variants for alias matching.
+    lowered = re.sub(r"[^a-z0-9\s]", " ", lowered)
+    tokens = [t for t in lowered.split() if t]
+    if not tokens:
+        return "Other ingredients"
+
+    token_set = set(tokens)
+    for heading, aliases in _GROUP_ALIASES:
+        if any(alias in lowered or alias in token_set for alias in aliases):
+            return heading.title()
+
+    # Fallback: group by first word so nearby variants still cluster.
+    first = tokens[0]
+    return first.capitalize()
+
+
+def _group_presets(rows):
+    groups = {}
+    order = []
+    for row in rows:
+        heading = _group_heading_for_name(row.get("name", ""))
+        row["display_name"] = _display_name_for_heading(row.get("name", ""), heading)
+        if heading not in groups:
+            groups[heading] = []
+            order.append(heading)
+        groups[heading].append(row)
+    return [{"heading": heading, "items": groups[heading]} for heading in order]
+
+
+def _display_name_for_heading(name: str, heading: str) -> str:
+    """
+    Normalize card labels to "<Heading> (<variant>)" where possible.
+    Example: "Baby Plum Tomatoes" -> "Tomatoes (Baby Plum)"
+    """
+    raw = (name or "").strip()
+    if not raw:
+        return heading
+
+    heading_clean = (heading or "").strip()
+    if not heading_clean:
+        return raw
+
+    raw_lower = raw.lower()
+    head_lower = heading_clean.lower()
+
+    if raw_lower == head_lower:
+        return heading_clean
+
+    variant = raw
+    if raw_lower.endswith(" " + head_lower):
+        variant = raw[: -(len(head_lower) + 1)].strip(" -_,")
+    elif raw_lower.startswith(head_lower + " "):
+        variant = raw[len(head_lower) + 1 :].strip(" -_,")
+
+    if not variant or variant.lower() == head_lower:
+        return heading_clean
+    return f"{heading_clean} ({variant})"
 
 
 def _redirect_after_quick_add(request) -> HttpResponseRedirect:
@@ -145,6 +266,13 @@ def pantry_zone(request, slug):
             return response
 
     presets = _presets_for_zone(request.user, zone)
+    preset_groups = _group_presets(presets)
+
+    catalog_template_by_zone = {
+        "produce": "pantry/catalogs/produce_catalog.html",
+        "dairy_proteins": "pantry/catalogs/dairy_proteins_catalog.html",
+        "pantry_staples": "pantry/catalogs/pantry_staples_catalog.html",
+    }
 
     return render(
         request,
@@ -152,5 +280,11 @@ def pantry_zone(request, slug):
         {
             "zone": zone,
             "presets": presets,
+            "preset_groups": preset_groups,
+            "catalog_initial_visible": CATALOG_INITIAL_VISIBLE,
+            "catalog_show_more_step": CATALOG_SHOW_MORE_STEP,
+            "catalog_template": catalog_template_by_zone.get(
+                zone["slug"], "pantry/catalogs/pantry_staples_catalog.html"
+            ),
         },
     )

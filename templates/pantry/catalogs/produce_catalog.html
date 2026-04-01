@@ -1,0 +1,56 @@
+<section aria-labelledby="pantry-catalog-heading">
+    <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-4">
+        <h2 id="pantry-catalog-heading" class="pantry-section-title mb-0">Ingredients Catalog</h2>
+        <span class="text-muted small">{{ presets|length }} in catalog</span>
+    </div>
+
+    {% for group in preset_groups %}
+        <div class="pantry-catalog-group {% if not forloop.first %}mt-5{% endif %}" data-catalog-group>
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                <h3 class="h6 text-uppercase text-muted fw-semibold mb-0">{{ group.heading }}</h3>
+                <span class="text-muted small">{{ group.items|length }}</span>
+            </div>
+            <div class="row g-3 g-md-4 pantry-ing-grid">
+                {% for p in group.items %}
+                    <div class="col-6 col-md-4 col-lg-3 pantry-catalog-item"
+                         data-catalog-item
+                         data-name="{{ p.display_name|lower }}">
+                        <form method="post" action="{% url 'pantry_zone' zone.slug %}" class="h-100">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="quick_add">
+                            <input type="hidden" name="preset_key" value="{{ p.key }}">
+                            <input type="hidden" name="return_zone" value="{{ zone.slug }}">
+                            <button type="submit"
+                                    class="pantry-ingtile w-100 h-100 {% if p.already_added %}pantry-ingtile--added{% endif %}"
+                                    {% if p.already_added %}disabled{% endif %}
+                                    {% if p.already_added %}aria-label="Already in inventory: {{ p.display_name }}"{% else %}aria-label="Add {{ p.display_name }} to inventory"{% endif %}>
+                                <span class="pantry-ingtile-visual">
+                                    {% if p.image_url %}
+                                        <img src="{{ p.image_url }}"
+                                             alt=""
+                                             class="pantry-ingtile-img"
+                                             width="56"
+                                             height="56"
+                                             loading="lazy"
+                                             decoding="async"
+                                             referrerpolicy="no-referrer"
+                                             onerror="this.classList.add('d-none'); var fb=this.parentElement && this.parentElement.querySelector('.pantry-ingtile-icon--fallback'); if (fb) { fb.classList.remove('d-none'); }">
+                                        <span class="pantry-ingtile-icon pantry-ingtile-icon--fallback d-none" aria-hidden="true"><i class="bi {{ p.icon }}"></i></span>
+                                    {% else %}
+                                        <span class="pantry-ingtile-icon" aria-hidden="true"><i class="bi {{ p.icon }}"></i></span>
+                                    {% endif %}
+                                </span>
+                                <span class="pantry-ingtile-name">{{ p.display_name }}</span>
+                                {% if p.already_added %}
+                                    <span class="pantry-ingtile-badge">Added</span>
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-muted mb-0">No ingredients are available in this catalog right now.</p>
+    {% endfor %}
+</section>

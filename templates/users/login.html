@@ -45,7 +45,9 @@
                                     <div class="form-group mb-3">
                                         <label class="form-label">Username</label>
                                         <div class="input-wrapper">
-                                            <span class="input-icon">👤</span>
+                                            <span class="input-icon">
+                                                <img src="{% static 'images/icons/username.png' %}" alt="Username" style="width: 16px; height: 16px; object-fit: contain;">
+                                            </span>
                                             <input type="text" name="username" class="form-control auth-input" placeholder="Enter your username" required>
                                         </div>
                                     </div>
@@ -53,9 +55,13 @@
                                     <div class="form-group mb-4">
                                         <label class="form-label">Password</label>
                                         <div class="input-wrapper">
-                                            <span class="input-icon">🔒</span>
+                                            <span class="input-icon">
+                                                <img src="{% static 'images/icons/password.png' %}" alt="Password" style="width: 16px; height: 16px; object-fit: contain;">
+                                            </span>
                                             <input type="password" name="password" class="form-control auth-input" id="loginPassword" placeholder="Enter your password" required>
-                                            <span class="input-toggle" data-password-target="loginPassword" role="button" tabindex="0" aria-label="Show or hide password">👁️</span>
+                                            <span class="input-toggle" data-password-target="loginPassword" role="button" tabindex="0" aria-label="Show or hide password">
+                                                <img src="{% static 'images/icons/hidden.png' %}" alt="Hidden" style="width: 16px; height: 16px; object-fit: contain;">
+                                            </span>
                                         </div>
                                     </div>
 
@@ -64,7 +70,7 @@
 
                                 <p class="auth-switch-text">
                                     Don't have an account?
-                                    <a href="{% url 'register' %}" class="auth-switch-link">Sign up for free</a>
+                                    <a href="{% url 'register' %}" class="auth-switch-link">Sign-Up Now</a>
                                 </p>
                             </div>
                         </div>

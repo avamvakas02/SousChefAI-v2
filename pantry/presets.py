@@ -89,7 +89,7 @@ QUICK_ZONES = [
     {
         "slug": "produce",
         "title": "Produce",
-        "subtitle": "Fresh fruit & vegetables",
+        "subtitle": "",
         "icon": "bi-leaf",
         "theme": "produce",
         "keys": [

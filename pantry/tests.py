@@ -10,6 +10,7 @@ from .ingredient_service import (
     themealdb_ingredient_image_url,
     themealdb_ingredient_slug,
 )
+from .views import _presets_for_zone
 from .models import PantryItem
 from .presets import QUICK_ZONES, get_icon, get_preset, get_zone_by_slug
 
@@ -19,6 +20,17 @@ User = get_user_model()
 class ThemealdbImageTests(TestCase):
     def test_slug_spaces_to_underscores(self):
         self.assertEqual(themealdb_ingredient_slug("Chicken Breast"), "chicken_breast")
+
+    def test_slug_strips_diacritics(self):
+        # TheMealDB thumbnail filenames are ASCII; slugging should match.
+        self.assertEqual(themealdb_ingredient_slug("Crème fraîche"), "creme_fraiche")
+
+    def test_slug_collapse_punctuation_and_underscores(self):
+        # TheMealDB thumbnail naming preserves punctuation like '-' and ','.
+        self.assertEqual(
+            themealdb_ingredient_slug("Free-range Egg, Beaten"),
+            "free-range_egg,_beaten",
+        )
 
     def test_image_url_small(self):
         url = themealdb_ingredient_image_url("Lime", size="small")
@@ -73,6 +85,58 @@ class PantryPresetsTests(TestCase):
     def test_get_icon(self):
         self.assertTrue(get_icon("tomatoes").startswith("bi-"))
         self.assertEqual(get_icon("unknown_key_xyz"), "bi-basket2")
+
+
+class PantryZonePresetsTests(TestCase):
+    def test_presets_for_zone_dedupes_by_name(self):
+        user = User.objects.create_user(
+            username="demo",
+            email="demo@example.com",
+            password="testpass123",
+        )
+        zone = {"slug": "produce", "keys": ["k1", "k2"]}
+
+        with patch("pantry.views.lookup_preset") as mock_lookup, patch(
+            "pantry.views.resolve_icon",
+            return_value="bi-basket2",
+        ), patch(
+            "pantry.views.ingredient_image_url",
+            return_value="https://example.com/img.png",
+        ):
+            # Both keys resolve to the same display name.
+            mock_lookup.side_effect = [
+                ("cat", "Same Ingredient"),
+                ("cat", "Same Ingredient"),
+            ]
+            presets = _presets_for_zone(user, zone)
+
+        self.assertEqual(len(presets), 1)
+        self.assertEqual(presets[0]["name"], "Same Ingredient")
+        self.assertFalse(presets[0]["already_added"])
+
+    def test_presets_for_zone_dedupes_by_image_url(self):
+        user = User.objects.create_user(
+            username="demo2",
+            email="demo2@example.com",
+            password="testpass123",
+        )
+        zone = {"slug": "produce", "keys": ["k1", "k2"]}
+
+        with patch("pantry.views.lookup_preset") as mock_lookup, patch(
+            "pantry.views.resolve_icon",
+            return_value="bi-basket2",
+        ), patch(
+            "pantry.views.ingredient_image_url",
+            side_effect=["https://example.com/same.png", "https://example.com/same.png"],
+        ):
+            # Names differ, but the image URL resolves to the same thumbnail.
+            mock_lookup.side_effect = [
+                ("cat", "Ingredient A"),
+                ("cat", "Ingredient B"),
+            ]
+            presets = _presets_for_zone(user, zone)
+
+        self.assertEqual(len(presets), 1)
 
 
 class PantryItemModelTests(TestCase):

@@ -22,10 +22,9 @@
                     <i class="bi {{ zone.icon }}"></i>
                 </div>
                 <div class="flex-grow-1 min-w-0">
-                    <p class="pantry-eyebrow mb-1">Ingredient catalog</p>
                     <h1 class="pantry-page-title mb-2">{{ zone.title }}</h1>
                     <p class="pantry-page-desc mb-0">
-                        {{ zone.subtitle }}. Select an ingredient to add it to your inventory. Items already on file are disabled until removed from the main Pantry screen.
+                        {% if zone.subtitle %}{{ zone.subtitle }}. {% endif %}Select ingredients to add to or to remove from your pantry.
                     </p>
                 </div>
             </header>
@@ -43,50 +42,26 @@
             {% endfor %}
         {% endif %}
 
-        <section aria-labelledby="pantry-catalog-heading">
-            <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-4">
-                <h2 id="pantry-catalog-heading" class="pantry-section-title mb-0">Available ingredients</h2>
-                <span class="text-muted small">{{ presets|length }} in catalog</span>
+        <div class="pantry-catalog-controls mb-4"
+             data-catalog-controls
+             data-initial-visible="{{ catalog_initial_visible }}"
+             data-show-more-step="{{ catalog_show_more_step }}">
+            <label for="pantry-catalog-search" class="form-label pantry-control-label mb-2">Find an ingredient</label>
+            <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="bi bi-search"></i></span>
+                <input id="pantry-catalog-search"
+                       type="search"
+                       class="form-control"
+                       placeholder="Search e.g. pasta, tomato, milk..."
+                       autocomplete="off">
             </div>
+            <p class="pantry-control-hint mb-0 mt-2">Tip: we show the first 15 ingredients initially. Search instantly or tap "Show more" to reveal more.</p>
+        </div>
 
-            <div class="row g-3 g-md-4 pantry-ing-grid">
-                {% for p in presets %}
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <form method="post" action="{% url 'pantry_zone' zone.slug %}" class="h-100">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="quick_add">
-                            <input type="hidden" name="preset_key" value="{{ p.key }}">
-                            <input type="hidden" name="return_zone" value="{{ zone.slug }}">
-                            <button type="submit"
-                                    class="pantry-ingtile w-100 h-100 {% if p.already_added %}pantry-ingtile--added{% endif %}"
-                                    {% if p.already_added %}disabled{% endif %}
-                                    {% if p.already_added %}aria-label="Already in inventory: {{ p.name }}"{% else %}aria-label="Add {{ p.name }} to inventory"{% endif %}>
-                                <span class="pantry-ingtile-visual">
-                                    {% if p.image_url %}
-                                        <img src="{{ p.image_url }}"
-                                             alt=""
-                                             class="pantry-ingtile-img"
-                                             width="56"
-                                             height="56"
-                                             loading="lazy"
-                                             decoding="async"
-                                             referrerpolicy="no-referrer"
-                                             onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');">
-                                        <span class="pantry-ingtile-icon pantry-ingtile-icon--fallback d-none" aria-hidden="true"><i class="bi {{ p.icon }}"></i></span>
-                                    {% else %}
-                                        <span class="pantry-ingtile-icon" aria-hidden="true"><i class="bi {{ p.icon }}"></i></span>
-                                    {% endif %}
-                                </span>
-                                <span class="pantry-ingtile-name">{{ p.name }}</span>
-                                {% if p.already_added %}
-                                    <span class="pantry-ingtile-badge">Saved</span>
-                                {% endif %}
-                            </button>
-                        </form>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
+        {% include catalog_template %}
+        <div class="text-center mt-4">
+            <button type="button" class="pantry-show-more-btn" id="pantry-show-more-btn">Show more</button>
+        </div>
 
         <p class="text-center mt-5 mb-0">
             <a href="{% url 'pantry' %}" class="btn btn-outline-secondary btn-sm px-4">Return to Pantry</a>

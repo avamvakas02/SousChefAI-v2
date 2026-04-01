@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import unicodedata
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -22,7 +23,7 @@ from . import presets as presets_mod
 
 logger = logging.getLogger(__name__)
 
-CACHE_KEY = "pantry.ingredient_catalog.v2"
+CACHE_KEY = "pantry.ingredient_catalog.v3"
 CACHE_TTL = 60 * 60 * 24  # 24 hours
 
 THEMEALDB_LIST_URL = getattr(
@@ -30,7 +31,7 @@ THEMEALDB_LIST_URL = getattr(
     "PANTRY_INGREDIENT_LIST_URL",
     "https://www.themealdb.com/api/json/v1/1/list.php?i=list",
 )
-MAX_PER_ZONE = getattr(settings, "PANTRY_MAX_INGREDIENTS_PER_ZONE", 100)
+MAX_PER_ZONE = getattr(settings, "PANTRY_MAX_INGREDIENTS_PER_ZONE", 1500)
 
 # Keyword routing (substring match on lowercased name)
 _PRODUCE_KW = (
@@ -44,7 +45,6 @@ _PRODUCE_KW = (
     "banana",
     "lemon",
     "lime",
-    "pepper",
     "mushroom",
     "spinach",
     "kale",
@@ -220,25 +220,87 @@ _PANTRY_KW = (
     "hazelnut",
 )
 
+# Priority routing to resolve keyword overlaps across zones.
+# Example: "apple cider vinegar" must route to pantry staples, not produce.
+_PRIORITY_ZONE_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    (
+        "pantry_staples",
+        (
+            "vinegar",
+            "oil",
+            "sauce",
+            "stock",
+            "flour",
+            "sugar",
+            "salt",
+            "pepper",
+            "paprika",
+            "cumin",
+            "oregano",
+            "thyme",
+            "nutmeg",
+            "cinnamon",
+            "clove",
+            "cardamom",
+            "chili powder",
+            "curry",
+            "rice",
+            "pasta",
+            "noodle",
+            "bean",
+            "lentil",
+            "yeast",
+            "cornstarch",
+            "cornflour",
+        ),
+    ),
+    (
+        "dairy_proteins",
+        (
+            "milk",
+            "cheese",
+            "cream",
+            "yogurt",
+            "butter",
+            "egg",
+            "chicken",
+            "beef",
+            "pork",
+            "salmon",
+            "fish",
+            "meat",
+            "shrimp",
+            "turkey",
+            "duck",
+            "bacon",
+            "lamb",
+            "tofu",
+            "ham",
+            "cod",
+            "tuna",
+            "steak",
+            "sausage",
+        ),
+    ),
+)
+
 _ZONE_META = [
     {
         "slug": "produce",
         "title": "Produce",
-        "subtitle": "Fresh fruit & vegetables",
+
         "icon": "bi-leaf",
         "theme": "produce",
     },
     {
         "slug": "dairy_proteins",
-        "title": "Dairy & proteins",
-        "subtitle": "Fridge & meat drawer",
+        "title": "Dairy & Proteins",
         "icon": "bi-egg-fried",
         "theme": "dairy",
     },
     {
         "slug": "pantry_staples",
-        "title": "Pantry staples",
-        "subtitle": "Oils, grains & dry goods",
+        "title": "Pantry Staples",
         "icon": "bi-box-seam",
         "theme": "staples",
     },
@@ -247,6 +309,9 @@ _ZONE_META = [
 
 def _assign_zone(name: str) -> str:
     n = name.lower()
+    for zone_slug, keywords in _PRIORITY_ZONE_RULES:
+        if any(kw in n for kw in keywords):
+            return zone_slug
     for kw in _PRODUCE_KW:
         if kw in n:
             return "produce"
@@ -383,7 +448,9 @@ def _build_from_api(meals: list[dict[str, Any]]) -> dict[str, Any]:
     zones_out = []
     for meta in _ZONE_META:
         slug = meta["slug"]
-        items = sorted(buckets[slug], key=lambda x: x[1].lower())[:MAX_PER_ZONE]
+        items = sorted(buckets[slug], key=lambda x: x[1].lower())
+        if MAX_PER_ZONE and MAX_PER_ZONE > 0:
+            items = items[:MAX_PER_ZONE]
         zones_out.append(
             {
                 **meta,
@@ -471,8 +538,16 @@ def themealdb_ingredient_slug(display_name: str) -> str:
     See https://www.themealdb.com/api.php — Ingredient Thumbnail Images.
     """
     s = (display_name or "").strip().lower()
+    # TheMealDB filenames are ASCII-ish (e.g. "Crème..." -> "creme...").
+    # Normalize accents/diacritics so we generate a more reliable slug.
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+    # TheMealDB docs: thumbnail URLs match ingredient name with underscores for spaces.
+    # That implies we should preserve punctuation such as '-' and ','.
     s = re.sub(r"\s+", "_", s)
-    s = re.sub(r"[^a-z0-9_]", "", s)
+    # Avoid breaking the URL path component.
+    s = s.replace("/", "_").replace("\\", "_")
+    # Collapse repeated underscores (e.g. accidental double spaces).
+    s = re.sub(r"_+", "_", s)
     return s or "ingredient"
 
 
