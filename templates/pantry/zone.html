@@ -8,12 +8,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="pantry-app pantry-zone-page pantry-zone-page--{{ zone.theme }}">
+<div class="pantry-app pantry-zone-page pantry-zone-page--{{ zone.theme }}"
+     id="pantry-zone-root"
+     data-pantry-zone-post-url="{% url 'pantry_zone' zone.slug %}">
     <section class="pantry-app-hero border-bottom">
         <div class="container py-3 py-lg-4">
             <nav aria-label="Breadcrumb">
                 <ol class="breadcrumb pantry-breadcrumb mb-3">
-                    <li class="breadcrumb-item"><a href="{% url 'pantry' %}">Pantry</a></li>
+                    <li class="breadcrumb-item"><span class="text-muted">Pantry</span></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ zone.title }}</li>
                 </ol>
             </nav>
@@ -24,7 +26,8 @@
                 <div class="flex-grow-1 min-w-0">
                     <h1 class="pantry-page-title mb-2">{{ zone.title }}</h1>
                     <p class="pantry-page-desc mb-0">
-                        {% if zone.subtitle %}{{ zone.subtitle }}. {% endif %}Select ingredients to add to or to remove from your pantry.
+                        {% if zone.subtitle %}{{ zone.subtitle }}. {% endif %}
+                        Use <strong>Add</strong> on a card to save it—this page stays put and focus moves to the next ingredient. Use <strong>Return to Pantry</strong> when you are finished.
                     </p>
                 </div>
             </header>
@@ -46,16 +49,15 @@
              data-catalog-controls
              data-initial-visible="{{ catalog_initial_visible }}"
              data-show-more-step="{{ catalog_show_more_step }}">
-            <label for="pantry-catalog-search" class="form-label pantry-control-label mb-2">Find an ingredient</label>
+            <label for="pantry-catalog-search" class="form-label pantry-control-label mb-2">Find ingredients you possibly have at home.</label>
             <div class="input-group">
                 <span class="input-group-text" aria-hidden="true"><i class="bi bi-search"></i></span>
                 <input id="pantry-catalog-search"
                        type="search"
                        class="form-control"
-                       placeholder="Search e.g. pasta, tomato, milk..."
+                       placeholder="Search ingredients you are looking for..."
                        autocomplete="off">
             </div>
-            <p class="pantry-control-hint mb-0 mt-2">Tip: we show the first 15 ingredients initially. Search instantly or tap "Show more" to reveal more.</p>
         </div>
 
         {% include catalog_template %}

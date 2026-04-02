@@ -1,7 +1,8 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from .ingredient_service import (
     clear_catalog_cache,
@@ -154,3 +155,78 @@ class PantryItemModelTests(TestCase):
         )
         self.assertIn("Olive oil", str(item))
         self.assertEqual(item.user, user)
+
+
+class PantryInventoryAjaxDeleteTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="invajax",
+            email="invajax@example.com",
+            password="testpass123",
+        )
+        self.item = PantryItem.objects.create(
+            user=self.user,
+            name="Ajax Lime",
+            category=PantryItem.Category.PRODUCE,
+        )
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def _csrf_token(self):
+        r = self.client.get(reverse("pantry"))
+        self.assertEqual(r.status_code, 200)
+        return self.client.cookies["csrftoken"].value
+
+    def test_ajax_single_delete_returns_json_with_removed_id(self):
+        token = self._csrf_token()
+        r = self.client.post(
+            reverse("pantry"),
+            {
+                "csrfmiddlewaretoken": token,
+                "action": "delete",
+                "item_id": str(self.item.pk),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()["ok"], True)
+        self.assertEqual(r.json()["removed_id"], self.item.pk)
+        self.assertEqual(PantryItem.objects.filter(pk=self.item.pk).count(), 0)
+
+    def test_ajax_single_delete_bad_id_returns_json_not_500(self):
+        token = self._csrf_token()
+        r = self.client.post(
+            reverse("pantry"),
+            {
+                "csrfmiddlewaretoken": token,
+                "action": "delete",
+                "item_id": "",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(r.json()["ok"], False)
+        self.assertEqual(PantryItem.objects.filter(pk=self.item.pk).count(), 1)
+
+    def test_ajax_bulk_delete_json_via_accept_header(self):
+        """JSON response when Accept: application/json (some proxies strip X-Requested-With)."""
+        token = self._csrf_token()
+        item2 = PantryItem.objects.create(
+            user=self.user,
+            name="Ajax Two",
+            category=PantryItem.Category.PRODUCE,
+        )
+        r = self.client.post(
+            reverse("pantry"),
+            {
+                "csrfmiddlewaretoken": token,
+                "action": "delete_bulk",
+                "item_id": [str(self.item.pk), str(item2.pk)],
+            },
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        self.assertTrue(body["ok"])
+        self.assertEqual(set(body["removed_ids"]), {self.item.pk, item2.pk})
+        self.assertEqual(PantryItem.objects.filter(user=self.user).count(), 0)

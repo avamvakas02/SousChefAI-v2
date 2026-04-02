@@ -8,14 +8,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="pantry-app">
+<div class="pantry-app" id="pantry-home-root">
     <section class="pantry-app-hero border-bottom">
         <div class="container py-4 py-lg-5">
             <div class="row align-items-center g-4 g-lg-5">
                 <div class="col-lg-6">
                     <header class="pantry-page-header">
                         <p class="pantry-hero-kicker mb-2">Plan better. Waste less.</p>
-                        <h1 class="pantry-page-title mb-3">Your smart pantry starts here</h1>
+                        <h1 class="pantry-page-title mb-3">Your Smart Pantry Starts Here !</h1>
                         <p class="pantry-page-desc mb-0">
                             Add ingredients in seconds and keep a clean view of what you already have before your next recipe.
                         </p>
@@ -23,10 +23,10 @@
 
                     <div class="pantry-hero-actions d-flex flex-wrap gap-2 mt-4">
                         <a href="{% url 'pantry_zone' 'produce' %}" class="btn pantry-fold-cta-button">
-                            Start with Produce
+                            Begin The Procedure
                         </a>
                         <a href="#pantry-inventory-heading" class="btn pantry-fold-cta-button">
-                            View inventory
+                            View Your Pantry
                         </a>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                     <div class="pantry-hero-media-card">
                         <div class="pantry-hero-media-frame">
                             <img
-                                src="{% static 'images/pantry_hero-imge.jpg' %}"
+                                src="{% static '\images\pantry_hero-img.jpg' %}"
                                 alt="Fresh pantry ingredients neatly arranged"
                                 class="pantry-hero-media-image"
                             >
@@ -60,8 +60,7 @@
         <section class="pantry-section mb-5 pb-lg-2" aria-labelledby="pantry-categories-heading">
             <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-4">
                 <div>
-                    <h2 id="pantry-categories-heading" class="pantry-section-title">Category catalogs</h2>
-                    <p class="pantry-section-desc mb-0">Choose a category to add items.</p>
+                    <h2 id="pantry-categories-heading" class="pantry-section-title">Ingredient Catalogs</h2>
                 </div>
             </div>
 
@@ -107,7 +106,7 @@
                             <div class="pantry-cat-card-body">
                                 <h3 class="pantry-cat-card-title">{{ z.title }}</h3>
                                 <p class="pantry-cat-card-sub">{{ z.subtitle }}</p>
-                                <span class="pantry-cat-card-cta">Open catalog <i class="bi bi-arrow-right-short ms-1" aria-hidden="true"></i></span>
+                                <span class="pantry-cat-card-cta">Open Catalog <i class="bi bi-arrow-right-short ms-1" aria-hidden="true"></i></span>
                             </div>
                         </a>
                     </div>
@@ -118,7 +117,7 @@
         <section class="pantry-section" aria-labelledby="pantry-inventory-heading">
             <div class="pantry-inventory-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
                 <div>
-                    <h2 id="pantry-inventory-heading" class="pantry-section-title mb-1">Inventory</h2>
+                    <h2 id="pantry-inventory-heading" class="pantry-section-title mb-1">Pantry</h2>
                     <p class="pantry-section-desc mb-0">A clean list of everything currently in your pantry.</p>
                 </div>
                 <p class="pantry-inventory-count mb-0">{{ items|length }} item{{ items|length|pluralize }}</p>
@@ -138,8 +137,18 @@
                                 {% endfor %}
                             </select>
                         </form>
-                        <p class="pantry-control-hint mb-0">Use category filter to narrow your inventory quickly.</p>
+                        <form id="pantry-inventory-bulk-form"
+                              method="post"
+                              action="{% url 'pantry' %}"
+                              class="d-flex flex-wrap align-items-end gap-2">
+                            {% csrf_token %}
+                            {% if category_filter %}<input type="hidden" name="return_category" value="{{ category_filter }}">{% endif %}
+                            {# action must be a hidden field: FormData(form) after preventDefault often omits the submit button pair #}
+                            <input type="hidden" name="action" value="delete_bulk">
+                            <button type="submit" class="btn btn-sm pantry-fold-cta-button px-3">Remove selected</button>
+                        </form>
                     </div>
+                    <p class="pantry-control-hint mb-0 mt-2">Use category filter to narrow your inventory. Select rows to remove many at once.</p>
                 </div>
 
                 {% if not items %}
@@ -154,17 +163,33 @@
                         <table class="table pantry-table table-hover align-middle mb-0">
                             <thead class="pantry-table-head">
                                 <tr>
+                                    <th scope="col" class="text-center pantry-table-check-col">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               id="pantry-inventory-select-all"
+                                               form="pantry-inventory-bulk-form"
+                                               title="Select all in this view"
+                                               aria-label="Select all items in this view">
+                                    </th>
                                     <th scope="col">Ingredient</th>
-                                    <th scope="col" class="d-none d-md-table-cell">Storage category</th>
+                                    <th scope="col" class="d-none d-md-table-cell">Category</th>
                                     <th scope="col" class="text-end d-none d-lg-table-cell">Quantity</th>
                                     <th scope="col" class="text-end" style="width: 5rem;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for item in items %}
-                                    <tr>
+                                    <tr data-pantry-item-id="{{ item.pk }}">
+                                        <td class="text-center pantry-table-check-col">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   name="item_id"
+                                                   value="{{ item.pk }}"
+                                                   form="pantry-inventory-bulk-form"
+                                                   aria-label="Select {{ item.catalog_display_name }}">
+                                        </td>
                                         <td>
-                                            <span class="pantry-table-name">{{ item.name }}</span>
+                                            <span class="pantry-table-name">{{ item.catalog_display_name }}</span>
                                             <div class="pantry-table-subline small text-muted mt-1 d-lg-none">
                                                 {{ item.get_category_display }}
                                                 {% if item.quantity %}<span class="mx-1">•</span>Qty: {{ item.quantity }}{% endif %}
@@ -182,9 +207,10 @@
                                         <td class="text-end">
                                             <form method="post" action="{% url 'pantry' %}{% if category_filter %}?category={{ category_filter }}{% endif %}" class="d-inline">
                                                 {% csrf_token %}
+                                                {% if category_filter %}<input type="hidden" name="return_category" value="{{ category_filter }}">{% endif %}
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="item_id" value="{{ item.pk }}">
-                                                <button type="submit" class="btn btn-sm pantry-btn-remove" title="Remove item" aria-label="Remove {{ item.name }}">
+                                                <button type="submit" class="btn btn-sm pantry-btn-remove" title="Remove item" aria-label="Remove {{ item.catalog_display_name }}">
                                                     <i class="bi bi-trash3" aria-hidden="true"></i>
                                                 </button>
                                             </form>

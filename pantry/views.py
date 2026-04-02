@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 import re
 
@@ -91,8 +92,8 @@ _GROUP_ALIASES = (
     ("sugar", ("sugar",)),
     ("salt", ("salt",)),
 )
-CATALOG_INITIAL_VISIBLE = 15
-CATALOG_SHOW_MORE_STEP = 16
+CATALOG_INITIAL_VISIBLE = 14
+CATALOG_SHOW_MORE_STEP = 15
 
 
 def _group_heading_for_name(name: str) -> str:
@@ -163,47 +164,178 @@ def _display_name_for_heading(name: str, heading: str) -> str:
     return f"{heading_clean} ({variant})"
 
 
-def _redirect_after_quick_add(request) -> HttpResponseRedirect:
-    """Return redirect target after quick_add; respects return_zone hidden field."""
+def _catalog_display_name(stored_name: str) -> str:
+    """Match catalog card labels: same rules as preset display_name."""
+    heading = _group_heading_for_name(stored_name)
+    return _display_name_for_heading(stored_name, heading)
+
+
+def _redirect_after_zone_catalog_post(request) -> HttpResponseRedirect:
+    """
+    After any catalog zone POST (add/remove, success or validation redirect).
+    Stay on the same ingredient catalog when ``return_zone`` is present so users
+    can repeat actions. No URL fragment so the browser does not jump scroll.
+    """
     slug = (request.POST.get("return_zone") or "").strip()
     if slug and get_zone_by_slug(slug):
         return redirect("pantry_zone", slug=slug)
     return redirect("pantry")
 
 
+def _redirect_pantry_inventory_after_change(request) -> HttpResponseRedirect:
+    """Return to pantry list preserving category filter; fragment lands on the inventory block."""
+    cat = (request.GET.get("category") or request.POST.get("return_category") or "").strip()
+    valid_categories = {c for c, _ in PantryItem.Category.choices}
+    base = reverse("pantry")
+    frag = "#pantry-inventory-heading"
+    if cat in valid_categories:
+        return HttpResponseRedirect(f"{base}?category={cat}{frag}")
+    return HttpResponseRedirect(f"{base}{frag}")
+
+
+def _pantry_inventory_ajax(request) -> bool:
+    """True when client expects JSON (fetch / XHR), not an HTML redirect."""
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return True
+    if request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest":
+        return True
+    accept = (request.headers.get("Accept") or request.META.get("HTTP_ACCEPT") or "").lower()
+    return "application/json" in accept
+
+
+def _remaining_in_pantry_view_count(request) -> int:
+    """Item count for the current pantry list filter (GET category or POST return_category)."""
+    category_filter = (request.GET.get("category") or request.POST.get("return_category") or "").strip()
+    valid_categories = {c for c, _ in PantryItem.Category.choices}
+    qs = PantryItem.objects.filter(user=request.user)
+    if category_filter in valid_categories:
+        qs = qs.filter(category=category_filter)
+    return qs.count()
+
+
 def _handle_pantry_post(request):
     """Handle POST actions for pantry home and zone pages. Returns redirect or None."""
-    action = request.POST.get("action")
+    action = (request.POST.get("action") or "").strip()
     if action == "delete":
-        item = get_object_or_404(
-            PantryItem,
-            pk=request.POST.get("item_id"),
-            user=request.user,
-        )
-        item.delete()
-        messages.success(request, "Removed from your pantry.")
+        raw_id = (request.POST.get("item_id") or "").strip()
+        try:
+            item_pk = int(raw_id)
+        except (TypeError, ValueError):
+            if _pantry_inventory_ajax(request):
+                return JsonResponse(
+                    {"ok": False, "message": "Invalid item selection."},
+                    status=400,
+                )
+            messages.error(request, "Could not remove that item.")
+            return _redirect_pantry_inventory_after_change(request)
+        try:
+            item = PantryItem.objects.get(pk=item_pk, user=request.user)
+        except PantryItem.DoesNotExist:
+            if _pantry_inventory_ajax(request):
+                return JsonResponse(
+                    {"ok": False, "message": "That item is no longer in your pantry."},
+                    status=404,
+                )
+            messages.warning(request, "That item is no longer in your pantry.")
+            return _redirect_pantry_inventory_after_change(request)
+        pk_removed = item.pk
+        label = _catalog_display_name(item.name)
         slug = (request.POST.get("return_zone") or "").strip()
+        item.delete()
         if slug and get_zone_by_slug(slug):
+            messages.success(request, f"Removed {label} from your pantry.")
             return redirect("pantry_zone", slug=slug)
-        return redirect("pantry")
+        if _pantry_inventory_ajax(request):
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "removed_id": pk_removed,
+                    "message": f"Removed {label} from your pantry.",
+                    "remaining_in_view": _remaining_in_pantry_view_count(request),
+                }
+            )
+        messages.success(request, f"Removed {label} from your pantry.")
+        return _redirect_pantry_inventory_after_change(request)
 
     if action == "quick_add":
         preset_key = (request.POST.get("preset_key") or "").strip()
+        quantity = (request.POST.get("quantity") or "").strip()
         parsed = lookup_preset(preset_key)
         if not parsed:
+            if _pantry_inventory_ajax(request):
+                return JsonResponse(
+                    {"ok": False, "message": "That ingredient could not be added."},
+                    status=400,
+                )
             messages.error(request, "That ingredient could not be added.")
-            return _redirect_after_quick_add(request)
+            return _redirect_after_zone_catalog_post(request)
         category, name = parsed
-        if PantryItem.objects.filter(user=request.user, name__iexact=name).exists():
-            messages.info(request, f"{name} is already in your pantry.")
+        existing = PantryItem.objects.filter(user=request.user, name__iexact=name).first()
+        if existing:
+            if quantity:
+                existing.quantity = quantity
+                existing.save(update_fields=["quantity", "updated_at"])
         else:
             PantryItem.objects.create(
                 user=request.user,
                 name=name,
                 category=category,
+                quantity=quantity,
             )
-            messages.success(request, f"Added {name}.")
-        return _redirect_after_quick_add(request)
+        if _pantry_inventory_ajax(request):
+            return JsonResponse({"ok": True, "in_pantry": True})
+        return _redirect_after_zone_catalog_post(request)
+
+    if action == "quick_remove":
+        preset_key = (request.POST.get("preset_key") or "").strip()
+        parsed = lookup_preset(preset_key)
+        if not parsed:
+            if _pantry_inventory_ajax(request):
+                return JsonResponse(
+                    {"ok": False, "message": "That ingredient could not be removed."},
+                    status=400,
+                )
+            messages.error(request, "That ingredient could not be removed.")
+            return _redirect_after_zone_catalog_post(request)
+        _, name = parsed
+        PantryItem.objects.filter(user=request.user, name__iexact=name).delete()
+        if _pantry_inventory_ajax(request):
+            return JsonResponse({"ok": True, "in_pantry": False})
+        return _redirect_after_zone_catalog_post(request)
+
+    if action == "delete_bulk":
+        raw_ids = request.POST.getlist("item_id")
+        pk_list = []
+        for x in raw_ids:
+            try:
+                pk_list.append(int(x))
+            except (TypeError, ValueError):
+                continue
+        if not pk_list:
+            if _pantry_inventory_ajax(request):
+                return JsonResponse(
+                    {"ok": False, "message": "Select at least one item to remove."},
+                    status=400,
+                )
+            messages.warning(request, "Select at least one item to remove.")
+            return _redirect_pantry_inventory_after_change(request)
+        qs = PantryItem.objects.filter(user=request.user, pk__in=pk_list)
+        removed_ids = list(qs.values_list("pk", flat=True))
+        count = len(removed_ids)
+        qs.delete()
+        msg = f"Removed {count} ingredient(s) from your pantry."
+        if _pantry_inventory_ajax(request):
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "removed_ids": removed_ids,
+                    "count": count,
+                    "message": msg,
+                    "remaining_in_view": _remaining_in_pantry_view_count(request),
+                }
+            )
+        messages.success(request, msg)
+        return _redirect_pantry_inventory_after_change(request)
 
     return None
 
@@ -224,6 +356,8 @@ def pantry_home(request):
         qs = qs.filter(category=category_filter)
 
     items = list(qs)
+    for row in items:
+        row.catalog_display_name = _catalog_display_name(row.name)
     counts = {c: 0 for c, _ in PantryItem.Category.choices}
     for row in (
         PantryItem.objects.filter(user=request.user)
@@ -239,7 +373,7 @@ def pantry_home(request):
 
     catalog = get_catalog()
 
-    return render(
+    response = render(
         request,
         "pantry/home.html",
         {
@@ -250,6 +384,10 @@ def pantry_home(request):
             "ingredient_catalog_source": catalog.get("source", "static"),
         },
     )
+    if request.method == "GET":
+        response["Cache-Control"] = "private, no-store, must-revalidate"
+        response["Vary"] = "Cookie"
+    return response
 
 
 @login_required
@@ -274,7 +412,7 @@ def pantry_zone(request, slug):
         "pantry_staples": "pantry/catalogs/pantry_staples_catalog.html",
     }
 
-    return render(
+    response = render(
         request,
         "pantry/zone.html",
         {
@@ -288,3 +426,7 @@ def pantry_zone(request, slug):
             ),
         },
     )
+    if request.method == "GET":
+        response["Cache-Control"] = "private, no-store, must-revalidate"
+        response["Vary"] = "Cookie"
+    return response
