@@ -11,6 +11,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
     )
+    birthday = models.DateField(blank=True, null=True)
     skill_level = models.CharField(
         max_length=20, choices=SkillLevel.choices, default=SkillLevel.BEGINNER
     )

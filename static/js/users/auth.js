@@ -6,8 +6,9 @@
 
     function togglePassword(fieldId) {
         var field = document.getElementById(fieldId);
-        if (!field) return;
+        if (!field) return false;
         field.type = field.type === 'password' ? 'text' : 'password';
+        return field.type === 'text';
     }
 
     window.togglePassword = togglePassword;
@@ -16,13 +17,23 @@
         document.querySelectorAll('.input-toggle[data-password-target]').forEach(function (el) {
             var targetId = el.getAttribute('data-password-target');
             if (!targetId) return;
+            var icon = el.querySelector('img');
+
+            function updateToggleIcon(isVisible) {
+                if (!icon || !icon.src) return;
+                var nextIcon = isVisible ? 'vissible.png' : 'hidden.png';
+                icon.src = icon.src.replace(/(hidden|vissible)\.png$/, nextIcon);
+            }
+
             el.addEventListener('click', function () {
-                togglePassword(targetId);
+                var isVisible = togglePassword(targetId);
+                updateToggleIcon(isVisible);
             });
             el.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    togglePassword(targetId);
+                    var isVisible = togglePassword(targetId);
+                    updateToggleIcon(isVisible);
                 }
             });
         });

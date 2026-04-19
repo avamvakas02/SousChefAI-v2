@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profile Settings — SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/profile_settings_menu.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="profile-settings-menu py-5">
+    <div class="container">
+        <div class="settings-menu-shell mx-auto">
+            <h1 class="settings-menu-title mb-4">Profile Settings</h1>
+
+            <a class="settings-menu-item" href="{% url 'account_settings' %}">
+                <span class="settings-menu-icon">
+                    <i class="bi bi-person-badge"></i>
+                </span>
+                <span class="settings-menu-label">My Account</span>
+                <span class="settings-menu-arrow">
+                    <i class="bi bi-chevron-right"></i>
+                </span>
+            </a>
+
+            <a class="settings-menu-item" href="{% url 'account_settings' %}#account-preferences">
+                <span class="settings-menu-icon">
+                    <i class="bi bi-sliders"></i>
+                </span>
+                <span class="settings-menu-label">My Preferences</span>
+                <span class="settings-menu-arrow">
+                    <i class="bi bi-chevron-right"></i>
+                </span>
+            </a>
+
+            <a class="settings-menu-item" href="{% url 'password_change' %}">
+                <span class="settings-menu-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </span>
+                <span class="settings-menu-label">Security</span>
+                <span class="settings-menu-arrow">
+                    <i class="bi bi-chevron-right"></i>
+                </span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

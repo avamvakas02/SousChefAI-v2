@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Recipe Discovery{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recipes/discovery.css' %}">
+{% endblock %}
+
+{% block content %}
+<section
+  class="recipe-discovery-page"
+  data-icon-time-url="{% static 'images/icons/rcard_time.png' %}"
+  data-icon-difficulty-url="{% static 'images/icons/rcard_difficuty.png' %}"
+  data-icon-portion-url="{% static 'images/icons/rcard_portion.png' %}"
+  data-icon-pantry-match-url="{% static 'images/icons/rcard_pantry_match.png' %}"
+>
+  <div class="container">
+    <section class="daily-suggestions-section" aria-label="Daily suggested recipes">
+      <h2 class="daily-suggestions-title">Our Daily Suggestion of Recipes</h2>
+      <p class="daily-suggestions-subtitle">6 ready-to-view picks refreshed every day.</p>
+      <div class="daily-carousel-shell">
+        <button
+          type="button"
+          class="daily-carousel-nav"
+          id="dailyCarouselPrev"
+          aria-label="Show previous daily recipes"
+        >&#8249;</button>
+        <div class="daily-carousel-viewport" id="dailyCarouselViewport">
+          <div class="daily-carousel-track" id="dailyCarouselTrack"></div>
+        </div>
+        <button
+          type="button"
+          class="daily-carousel-nav"
+          id="dailyCarouselNext"
+          aria-label="Show next daily recipes"
+        >&#8250;</button>
+      </div>
+    </section>
+    <h1>Discover recipes from your pantry</h1>
+    <p>Pantry-first AI suggestions powered by Gemini.</p>
+    <button type="button" id="generateBtn">
+      <span class="btn-star" aria-hidden="true">✦</span>
+      <span>Generate Recipes</span>
+    </button>
+    <p id="statusMessage"></p>
+    <div id="resultsContainer"></div>
+  </div>
+</section>
+
+{{ daily_suggested_recipes|json_script:"daily-recipes-data" }}
+<script src="{% static 'js/recipes/discovery.js' %}"></script>
+{% endblock %}

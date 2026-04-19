@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container pb-5" style="max-width: 900px;" data-recipe-detail-url="{% url 'recipe_detail_page' %}">
+    
+    <!-- Profile Header Card -->
+    <div class="profile-header-card shadow">
+        
+        <div class="profile-avatar-container">
+            <!-- Using UI Avatars with primary brand color, allows standard fallback until image upload is added -->
+            <img class="profile-avatar" src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username }}&background=e5e7eb&color=6b7280&size=200" alt="Avatar">
+            <a href="{% url 'profile_settings_menu' %}" style="position: absolute; bottom: 8px; right: 8px; background: rgba(255,255,255,0.96); color: var(--text-medium); border-radius: 6px; padding: 2px 6px; font-size: 12px; text-decoration: none; box-shadow: 0 2px 6px rgba(44,24,16,0.18); border: 1px solid rgba(92,61,46,0.18);">
+                <i class="bi bi-pencil-fill"></i>
+            </a>
+        </div>
+
+        <div class="profile-user-info">
+            <h2 class="profile-user-name">{{ user.get_full_name|default:user.username }}</h2>
+            
+            <a href="{% url 'profile_settings_menu' %}" class="profile-settings-btn" title="Settings">
+                <i class="bi bi-gear"></i>
+            </a>
+        </div>
+
+        <div class="profile-tabs">
+            <a href="#" class="profile-tab active">Favorites</a>
+        </div>
+
+    </div>
+
+    <!-- Favorites Grid -->
+    <div class="favorites-section">        
+        {% if favorite_recipes %}
+        <div class="favorites-grid">
+            {% for fav in favorite_recipes %}
+            {% with index=forloop.counter0|stringformat:"s" %}
+            {% with script_id="fav_recipe_"|add:index %}
+            <article class="recipe-card" onclick="loadFavorite('{{ script_id }}')" role="button" tabindex="0" onkeydown="handleFavoriteCardKeydown(event, '{{ script_id }}')">
+                <div class="recipe-card-image-wrap">
+                    <img class="recipe-card-image" src="{{ fav.image_url|default:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80' }}" alt="Recipe image">
+                    <button class="recipe-fav-btn" type="button" title="Add to Favourites" aria-label="Add to Favourites" onclick="event.stopPropagation(); addFavoriteFromCard('{{ script_id }}', this)">♥</button>
+                </div>
+                <div class="recipe-card-body">
+                    <h3 class="recipe-card-title">{{ fav.title }}</h3>
+                    <div class="recipe-meta">
+                        <div class="recipe-meta-item">
+                            <div class="recipe-meta-value">
+                                <img class="recipe-meta-icon" src="{% static 'images/icons/rcard_time.png' %}" alt="Time icon">
+                                <p>{{ fav.recipe_data.cook_time_minutes|default:"-" }}'</p>
+                            </div>
+                        </div>
+                        <div class="recipe-meta-item">
+                            <div class="recipe-meta-value">
+                                <img class="recipe-meta-icon" src="{% static 'images/icons/rcard_difficuty.png' %}" alt="Difficulty icon">
+                                <p>{{ fav.recipe_data.difficulty|default:"Easy" }}</p>
+                            </div>
+                        </div>
+                        <div class="recipe-meta-item">
+                            <div class="recipe-meta-value">
+                                <img class="recipe-meta-icon" src="{% static 'images/icons/rcard_portion.png' %}" alt="Portions icon">
+                                <p>{{ fav.recipe_data.servings|default:"2" }}</p>
+                            </div>
+                        </div>
+                        <div class="recipe-meta-item">
+                            <div class="recipe-meta-value">
+                                <img class="recipe-meta-icon" src="{% static 'images/icons/rcard_pantry_match.png' %}" alt="Pantry match icon">
+                                <p>{{ fav.recipe_data.pantry_match_percent|default:"0" }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="recipe-details-btn" onclick="event.stopPropagation(); loadFavorite('{{ script_id }}')">Show The Details</button>
+                </div>
+                <!-- We stash the raw JSON safely -->
+                {{ fav.recipe_data|json_script:script_id }}
+            </article>
+            {% endwith %}
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-heart text-muted" style="font-size: 3rem;"></i>
+            <h5 class="mt-3 text-muted">No favorite recipes yet</h5>
+            <p class="text-muted">Explore and save recipes that you love!</p>
+            <a href="{% url 'recipe_discovery_page' %}" class="btn btn-outline-primary mt-2">Discover Recipes</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% block extra_js %}
+<script src="{% static 'js/users/profile.js' %}"></script>
+{% endblock %}
+{% endblock %}

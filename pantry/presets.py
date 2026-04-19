@@ -90,6 +90,11 @@ QUICK_ZONES = [
         "slug": "produce",
         "title": "Produce",
         "subtitle": "",
+        "hero_description": (
+            "Fresh vegetables, fruit, and herbs you’d find in the produce aisle or growing on your windowsill. "
+            "Add what you usually keep on hand so your pantry reflects the colorful, seasonal side of your cooking—and "
+            "recipes can suggest ingredients you’re more likely to have."
+        ),
         "icon": "bi-leaf",
         "theme": "produce",
         "keys": [
@@ -109,6 +114,11 @@ QUICK_ZONES = [
         "slug": "dairy_proteins",
         "title": "Dairy & proteins",
         "subtitle": "Fridge & meat drawer",
+        "hero_description": (
+            "Eggs, dairy, and the proteins you store in the fridge or freezer. "
+            "Log the cheeses, milks, yogurts, and meats you buy most often so your list stays grounded in what’s actually "
+            "chilling at home—not a generic shopping template."
+        ),
         "icon": "bi-egg-fried",
         "theme": "dairy",
         "keys": [
@@ -127,6 +137,11 @@ QUICK_ZONES = [
         "slug": "pantry_staples",
         "title": "Pantry staples",
         "subtitle": "Oils, grains & dry goods",
+        "hero_description": (
+            "Oils, grains, pasta, flour, spices, and the jars and boxes that live in your cupboards. "
+            "These are the quiet workhorses behind most meals—capturing them here keeps your inventory honest when you "
+            "plan from the shelf, not from memory."
+        ),
         "icon": "bi-box-seam",
         "theme": "staples",
         "keys": [

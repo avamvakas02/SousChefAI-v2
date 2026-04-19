@@ -30,3 +30,9 @@ class PantryItemForm(forms.ModelForm):
                 }
             ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            if not str(self.initial.get("quantity", "") or "").strip():
+                self.initial["quantity"] = "1"

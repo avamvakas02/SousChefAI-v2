@@ -4,7 +4,7 @@
 {% block title %}SousChefAI/Register{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/users/auth.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -87,7 +87,7 @@
                                                 <img src="{% static 'images/icons/password.png' %}" alt="Password" style="width: 16px; height: 16px; object-fit: contain;">
                                             </span>
                                             <input type="password" name="password1" class="form-control auth-input" id="registerPassword" placeholder="Create a strong password" required>
-                                            <span class="input-toggle" data-password-target="registerPassword" role="button" tabindex="0" aria-label="Show or hide password">👁️</span>
+                                            <span class="input-toggle" data-password-target="registerPassword" role="button" tabindex="0" aria-label="Show or hide password"><img src="{% static 'images/icons/hidden.png' %}" alt="Show or hide password" style="width: 16px; height: 16px; object-fit: contain;"></span>
                                         </div>
                                         <div class="password-strength mt-2">
                                             <div class="strength-bar" id="strengthBar"></div>
@@ -110,11 +110,11 @@
                                         <label class="form-label">Your Cooking Skill Level</label>
                                         <div class="skill-selector">
                                             <input type="radio" name="skill_level" id="beginner" value="beginner" checked class="skill-radio">
-                                            <label for="beginner" class="skill-option"><span>🥄</span> Beginner</label>
+                                            <label for="beginner" class="skill-option"><span><img src="{% static 'images/icons/levels/novice_v2.png' %}" alt="Beginner" style="width: 16px; height: 16px; object-fit: contain;"></span> Beginner</label>
                                             <input type="radio" name="skill_level" id="intermediate" value="intermediate" class="skill-radio">
-                                            <label for="intermediate" class="skill-option"><span>🍳</span> Intermediate</label>
+                                            <label for="intermediate" class="skill-option"><span><img src="{% static 'images/icons/levels/intermediate_v2.png' %}" alt="Intermediate" style="width: 16px; height: 16px; object-fit: contain;"></span> Intermediate</label>
                                             <input type="radio" name="skill_level" id="advanced" value="advanced" class="skill-radio">
-                                            <label for="advanced" class="skill-option"><span>👨‍🍳</span> Advanced</label>
+                                            <label for="advanced" class="skill-option"><span><img src="{% static 'images/icons/levels/advanced.png' %}" alt="Advanced" style="width: 16px; height: 16px; object-fit: contain;"></span> Advanced</label>
                                         </div>
                                     </div>
 
@@ -136,5 +136,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/auth.js' %}"></script>
+<script src="{% static 'js/users/auth.js' %}"></script>
 {% endblock %}

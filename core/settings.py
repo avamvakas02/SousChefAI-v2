@@ -28,12 +28,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+# Railway/production must set SECRET_KEY in the environment (empty breaks sessions/tests locally).
+SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-local-only-set-secret-key-in-env"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app']
+
+def _env_list(name: str, default: str = "") -> list[str]:
+    raw = os.getenv(name, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+def _oauth_env_value(base_name: str) -> str:
+    """
+    Keep local and production OAuth credentials isolated.
+    Priority:
+      1) *_LOCAL when DEBUG=True
+      2) *_PROD when DEBUG=False
+      3) legacy base variable for backward compatibility
+    """
+    env_specific_name = f"{base_name}_LOCAL" if DEBUG else f"{base_name}_PROD"
+    return os.getenv(env_specific_name, "").strip() or os.getenv(base_name, "").strip()
+
+
+ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", "localhost,127.0.0.1,.railway.app")
+CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", "")
 
 # Behind Railway / Heroku / Render, the edge terminates TLS; without this, Django
 # thinks the request is HTTP and builds http:// OAuth redirect_uri values — Facebook
@@ -87,6 +107,7 @@ _LOCAL_APPS = [
     "recipes",
     "ai_assistant",
     "pages",
+    "subscriptions"
 ]
 
 INSTALLED_APPS = (
@@ -125,10 +146,10 @@ if ALLAUTH_ENABLED:
 
     # Social login (Google / Facebook). Prefer env-based credentials; you can
     # alternatively add a Social application in Django admin.
-    _google_client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "").strip()
-    _google_client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
-    _facebook_client_id = os.getenv("FACEBOOK_OAUTH_CLIENT_ID", "").strip()
-    _facebook_client_secret = os.getenv("FACEBOOK_OAUTH_CLIENT_SECRET", "").strip()
+    _google_client_id = _oauth_env_value("GOOGLE_OAUTH_CLIENT_ID")
+    _google_client_secret = _oauth_env_value("GOOGLE_OAUTH_CLIENT_SECRET")
+    _facebook_client_id = _oauth_env_value("FACEBOOK_OAUTH_CLIENT_ID")
+    _facebook_client_secret = _oauth_env_value("FACEBOOK_OAUTH_CLIENT_SECRET")
 
     SOCIALACCOUNT_PROVIDERS = {
         "google": {
@@ -165,6 +186,8 @@ if ALLAUTH_ENABLED:
 
     # Prefer explicit resolution when both env and DB Social applications exist (see users.adapters).
     SOCIALACCOUNT_ADAPTER = "users.adapters.SocialAccountAdapter"
+    # Merge anonymous recipe quota after login (OAuth and allauth account flows).
+    ACCOUNT_ADAPTER = "users.account_adapter.AccountAdapter"
     # Skip allauth's intermediate "Sign In Via … / Continue" page; start OAuth immediately (uses site's base styling on your pages only).
     SOCIALACCOUNT_LOGIN_ON_GET = True
 
@@ -220,12 +243,23 @@ if dj_database_url is None:
         }
     }
 else:
+    _database_url = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+    _conn_max_age = int(os.getenv("DB_CONN_MAX_AGE", "600"))
     DATABASES = {
         "default": dj_database_url.config(
-            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-            conn_max_age=600,
+            default=_database_url,
+            conn_max_age=_conn_max_age,
         )
     }
+    _db_engine = DATABASES["default"].get("ENGINE", "")
+    _is_postgres = "postgresql" in _db_engine
+    _ssl_override = os.getenv("DB_SSL_REQUIRE", "").strip().lower()
+    if _is_postgres:
+        # Supabase Postgres requires SSL. Allow explicit opt-out only via env.
+        if _ssl_override in ("0", "false", "no"):
+            DATABASES["default"].setdefault("OPTIONS", {}).pop("sslmode", None)
+        else:
+            DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = "require"
 
 
 
@@ -268,12 +302,33 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Gemini AI
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
+
+def _env_clean(name: str) -> str:
+    """
+    Reads env vars and trims accidental wrapping quotes.
+    """
+    return os.getenv(name, "").strip().strip('"').strip("'")
+
+
+# Stripe billing (Phase D)
+STRIPE_SECRET_KEY = _env_clean("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = _env_clean("STRIPE_WEBHOOK_SECRET")
+STRIPE_PRICE_REGULAR_MONTHLY = _env_clean("STRIPE_PRICE_REGULAR_MONTHLY")
+STRIPE_PRICE_PREMIUM_MONTHLY = _env_clean("STRIPE_PRICE_PREMIUM_MONTHLY")
+STRIPE_PRICE_PREMIUM_YEARLY = _env_clean("STRIPE_PRICE_PREMIUM_YEARLY")
+STRIPE_LINK_REGULAR_MONTHLY = _env_clean("STRIPE_LINK_REGULAR_MONTHLY")
+STRIPE_LINK_PREMIUM_MONTHLY = _env_clean("STRIPE_LINK_PREMIUM_MONTHLY")
+STRIPE_LINK_PREMIUM_YEARLY = _env_clean("STRIPE_LINK_PREMIUM_YEARLY")
 
 # Pantry ingredient catalog (TheMealDB list API; no key required)
 CACHES = {
@@ -287,7 +342,8 @@ PANTRY_INGREDIENT_LIST_URL = os.getenv(
     "PANTRY_INGREDIENT_LIST_URL",
     "https://www.themealdb.com/api/json/v1/1/list.php?i=list",
 )
-PANTRY_MAX_INGREDIENTS_PER_ZONE = int(os.getenv("PANTRY_MAX_INGREDIENTS_PER_ZONE", "100"))
+# 0 (or any non-positive value) means "no cap" in pantry.ingredient_service.
+PANTRY_MAX_INGREDIENTS_PER_ZONE = int(os.getenv("PANTRY_MAX_INGREDIENTS_PER_ZONE", "0"))
 # Thumbnails: TheMealDB CDN (same project as ingredient list); see ingredient_service.themealdb_ingredient_image_url
 PANTRY_SHOW_INGREDIENT_IMAGES = os.getenv("PANTRY_SHOW_INGREDIENT_IMAGES", "True") == "True"
 

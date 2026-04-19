@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pricing | SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/pricing.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="container py-5 pricing-page">
+  <header class="pricing-hero">
+    <p class="pricing-kicker mb-2">Simple plans, real kitchen value</p>
+    <h1 class="mb-2">Choose your SousChefAI plan</h1>
+    <p class="pricing-lead mb-0">Start in seconds with secure Stripe checkout. Cancel anytime, no hidden fees, instant access after payment.</p>
+  </header>
+
+  <div class="trust-pills" role="list" aria-label="Payment and billing reassurances">
+    <span class="trust-pill" role="listitem">No hidden fees</span>
+    <span class="trust-pill" role="listitem">Secure Stripe checkout</span>
+    <span class="trust-pill" role="listitem">Cancel anytime</span>
+  </div>
+
+  <div class="pricing-wrap">
+    <div class="pricing-grid">
+      <article class="plan-card plan-card-visitor">
+        <div class="plan-top">
+          <div class="plan-name">Visitor</div>
+          <div class="plan-sub">Best for trying SousChefAI before upgrading</div>
+          <div class="plan-price">€0 <small>/ month</small></div>
+        </div>
+        <div class="plan-cta">
+          {% if user.is_authenticated %}
+            <a class="btn btn-light plan-btn js-plan-cta" href="/pantry/" data-plan-name="visitor" data-plan-tier="free" data-plan-billing="monthly">Continue Free</a>
+          {% else %}
+            <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="visitor" data-plan-tier="free" data-plan-billing="monthly">Try for Free</a>
+          {% endif %}
+        </div>
+        <ul class="plan-list">
+          <li>2 AI recipe generations each month</li>
+          <li>Build and organize your pantry</li>
+          <li>Discover recipes for everyday cooking</li>
+          <li class="exclude">Unlimited recipe generations</li>
+        </ul>
+      </article>
+
+      <article class="plan-card">
+        <div class="plan-top">
+          <div class="plan-name">Regular</div>
+          <div class="plan-sub">Best for weekly meal planning and consistency</div>
+          <div class="plan-price">€1.99 <small>/ month</small></div>
+        </div>
+        <div class="plan-cta">
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">
+              {% csrf_token %}
+              <input type="hidden" name="price_id" value="{{ stripe_price_regular_monthly }}">
+              <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">Start Regular</button>
+            </form>
+          {% else %}
+            <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">Start Regular</a>
+          {% endif %}
+        </div>
+        <ul class="plan-list">
+          <li>10 AI recipe generations monthly</li>
+          <li>Everything in Visitor</li>
+          <li>Plan meals with less decision fatigue</li>
+          <li class="exclude">Unlimited recipe generations</li>
+        </ul>
+      </article>
+
+      <article class="plan-card featured">
+        <div class="plan-top">
+          <div class="plan-name">Premium <span class="tag">Most Popular</span></div>
+          <div class="plan-sub">Best for daily cooking with unlimited AI help</div>
+          <div class="plan-price">€4.99 <small>/ month</small></div>
+        </div>
+        <div class="plan-cta">
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">
+              {% csrf_token %}
+              <input type="hidden" name="price_id" value="{{ stripe_price_premium_monthly }}">
+              <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">Start Premium</button>
+            </form>
+          {% else %}
+            <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">Start Premium</a>
+          {% endif %}
+        </div>
+        <ul class="plan-list">
+          <li>Unlimited AI recipe generations</li>
+          <li>Everything in Regular</li>
+          <li>Fast daily support for smarter cooking</li>
+          <li class="exclude">Lower yearly price per month</li>
+        </ul>
+      </article>
+
+      <article class="plan-card">
+        <div class="plan-top">
+          <div class="plan-name">Chef's Year Pass <span class="tag">Best Value</span></div>
+          <div class="plan-sub">Best for long-term savings with full Premium access</div>
+          <div class="plan-price">€34.99 <small>/ year</small></div>
+          <div class="plan-savings">Save 41% vs Premium monthly</div>
+        </div>
+        <div class="plan-cta">
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">
+              {% csrf_token %}
+              <input type="hidden" name="price_id" value="{{ stripe_price_premium_yearly }}">
+              <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">Start Year Pass</button>
+            </form>
+          {% else %}
+            <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">Start Year Pass</a>
+          {% endif %}
+        </div>
+        <ul class="plan-list">
+          <li>Unlimited AI recipe generations</li>
+          <li>Everything in Premium</li>
+          <li>Pay once and save all year</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+
+  <section class="trust-strip" aria-label="Checkout trust details">
+    <div class="trust-item"><strong>Powered by Stripe</strong><span>Encrypted payments and card security</span></div>
+    <div class="trust-item"><strong>Cancel anytime</strong><span>Manage or stop your plan with no lock-in</span></div>
+    <div class="trust-item"><strong>Upgrade or downgrade</strong><span>Switch plans whenever your needs change</span></div>
+  </section>
+
+  <section class="pricing-faq" aria-label="Pricing frequently asked questions">
+    <h2>Frequently asked questions</h2>
+    <div class="accordion" id="pricingFaq">
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="faqCancelHeading">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqCancel" aria-expanded="true" aria-controls="faqCancel">
+            Can I cancel anytime?
+          </button>
+        </h3>
+        <div id="faqCancel" class="accordion-collapse collapse show" aria-labelledby="faqCancelHeading" data-bs-parent="#pricingFaq">
+          <div class="accordion-body">
+            Yes. You can cancel your subscription anytime and keep access until your current billing period ends.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="faqLimitsHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqLimits" aria-expanded="false" aria-controls="faqLimits">
+            What happens if I hit my recipe limit?
+          </button>
+        </h3>
+        <div id="faqLimits" class="accordion-collapse collapse" aria-labelledby="faqLimitsHeading" data-bs-parent="#pricingFaq">
+          <div class="accordion-body">
+            Visitor and Regular users can upgrade instantly to continue generating recipes without waiting for the next month.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="faqSwitchHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqSwitch" aria-expanded="false" aria-controls="faqSwitch">
+            Can I switch plans later?
+          </button>
+        </h3>
+        <div id="faqSwitch" class="accordion-collapse collapse" aria-labelledby="faqSwitchHeading" data-bs-parent="#pricingFaq">
+          <div class="accordion-body">
+            Absolutely. You can move between plans based on your cooking frequency and budget.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h3 class="accordion-header" id="faqChargeHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCharge" aria-expanded="false" aria-controls="faqCharge">
+            Do I get charged immediately?
+          </button>
+        </h3>
+        <div id="faqCharge" class="accordion-collapse collapse" aria-labelledby="faqChargeHeading" data-bs-parent="#pricingFaq">
+          <div class="accordion-body">
+            Charges are handled securely by Stripe at checkout and your selected plan activates right after successful payment.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/pricing.js' %}"></script>
+{% endblock %}

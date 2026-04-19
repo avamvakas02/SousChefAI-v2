@@ -4,7 +4,7 @@
 {% block title %}{{ zone.title }}SousChefAI/Pantry{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+<link rel="stylesheet" href="{% static 'css/pantry/pantry.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -12,25 +12,71 @@
      id="pantry-zone-root"
      data-pantry-zone-post-url="{% url 'pantry_zone' zone.slug %}">
     <section class="pantry-app-hero border-bottom">
-        <div class="container py-3 py-lg-4">
+        <div class="container py-4 py-lg-5">
             <nav aria-label="Breadcrumb">
-                <ol class="breadcrumb pantry-breadcrumb mb-3">
-                    <li class="breadcrumb-item"><span class="text-muted">Pantry</span></li>
+                <ol class="breadcrumb pantry-breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a href="{% url 'pantry' %}">Pantry</a></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ zone.title }}</li>
                 </ol>
             </nav>
-            <header class="pantry-zone-page-header d-flex flex-wrap align-items-start gap-3">
-                <div class="pantry-zone-page-icon pantry-zone-page-icon--{{ zone.theme }}" aria-hidden="true">
-                    <i class="bi {{ zone.icon }}"></i>
+
+            <div class="row align-items-center g-4 g-lg-5">
+                <div class="col-md-5 col-lg-4 text-center text-md-start">
+                    <div class="pantry-zone-hero-placeholder pantry-zone-hero-placeholder--{{ zone.theme }}{% if zone.slug == 'pantry_staples' or zone.slug == 'dairy_proteins' or zone.slug == 'produce' %} pantry-zone-hero-placeholder--photo{% endif %}"
+                         {% if zone.slug != 'pantry_staples' and zone.slug != 'dairy_proteins' and zone.slug != 'produce' %}role="img" aria-label="Illustration placeholder for the {{ zone.title }} catalog"{% endif %}>
+                        {% if zone.slug == 'pantry_staples' %}
+                            <img src="{% static 'images/catalogs/pantry-staples.jpg' %}"
+                                 alt="Pantry staples—jars, grains, and shelf ingredients"
+                                 class="pantry-zone-hero-placeholder-photo"
+                                 width="800"
+                                 height="600"
+                                 loading="lazy"
+                                 decoding="async">
+                        {% elif zone.slug == 'dairy_proteins' %}
+                            <img src="{% static 'images/catalogs/diary & proteins.jpg' %}"
+                                 alt="Dairy and proteins—eggs, dairy, and fridge ingredients"
+                                 class="pantry-zone-hero-placeholder-photo"
+                                 width="800"
+                                 height="600"
+                                 loading="lazy"
+                                 decoding="async">
+                        {% elif zone.slug == 'produce' %}
+                            <img src="{% static 'images/catalogs/produce.jpg' %}"
+                                 alt="Fresh produce—vegetables, fruit, and herbs"
+                                 class="pantry-zone-hero-placeholder-photo"
+                                 width="800"
+                                 height="600"
+                                 loading="lazy"
+                                 decoding="async">
+                        {% else %}
+                            <span class="pantry-zone-hero-placeholder-inner" aria-hidden="true"></span>
+                            <span class="pantry-zone-hero-placeholder-caption">Your photo here</span>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="flex-grow-1 min-w-0">
-                    <h1 class="pantry-page-title mb-2">{{ zone.title }}</h1>
-                    <p class="pantry-page-desc mb-0">
-                        {% if zone.subtitle %}{{ zone.subtitle }}. {% endif %}
-                        Use <strong>Add</strong> on a card to save it—this page stays put and focus moves to the next ingredient. Use <strong>Return to Pantry</strong> when you are finished.
-                    </p>
+                <div class="col-md-7 col-lg-8">
+                    <header class="pantry-zone-page-header">
+                        <h1 class="pantry-page-title mb-3">{{ zone.title }}</h1>
+                        <p class="pantry-zone-hero-lead mb-4">
+                            {% firstof zone.hero_description zone.subtitle "Browse this catalog to add ingredients to your pantry." %}
+                        </p>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <a href="{% url 'pantry' %}" class="btn pantry-zone-hero-cta align-self-start">
+                                <i class="bi bi-arrow-left me-2" aria-hidden="true"></i>Return to Pantry
+                            </a>
+                            {% if zone.slug == 'produce' %}
+                                <a href="{% url 'pantry_zone' 'dairy_proteins' %}" class="btn pantry-zone-hero-cta align-self-start">
+                                    Move to Diary &amp; Proteins <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+                                </a>
+                            {% elif zone.slug == 'dairy_proteins' %}
+                                <a href="{% url 'pantry_zone' 'pantry_staples' %}" class="btn pantry-zone-hero-cta align-self-start">
+                                    Move to Pantry Staples <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </header>
                 </div>
-            </header>
+            </div>
         </div>
     </section>
 
@@ -45,7 +91,7 @@
             {% endfor %}
         {% endif %}
 
-        <div class="pantry-catalog-controls mb-4"
+        <div id="pantry-catalog-controls" class="pantry-catalog-controls mb-4"
              data-catalog-controls
              data-initial-visible="{{ catalog_initial_visible }}"
              data-show-more-step="{{ catalog_show_more_step }}">
@@ -73,5 +119,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/pantry.js' %}"></script>
+<script src="{% static 'js/pantry/pantry.js' %}"></script>
 {% endblock %}

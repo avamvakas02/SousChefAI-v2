@@ -81,6 +81,21 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--primary);
 }
 
+.navbar-nav .nav-link.active {
+    color: var(--primary);
+    font-weight: 700;
+    background: transparent;
+    text-decoration: none;
+}
+
+.navbar-nav .dropdown-item.active,
+.navbar-nav .dropdown-item:active {
+    color: var(--primary-dark);
+    background: transparent;
+    font-weight: 600;
+    text-decoration: none;
+}
+
 #mainNavbar,
 #mainNavbar * {
     pointer-events: auto !important;
@@ -119,6 +134,26 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--white) !important;
     transform: translateY(-3px);
     box-shadow: 0 10px 30px var(--shadow);
+}
+
+/* Keep authenticated navbar button color stable on click/open */
+.btn.btn-primary.nav-cta,
+.btn.btn-primary.nav-cta:focus,
+.btn.btn-primary.nav-cta:active,
+.btn.btn-primary.nav-cta.show,
+.show > .btn.btn-primary.nav-cta.dropdown-toggle,
+.btn-check:checked + .btn.btn-primary.nav-cta,
+.btn-check:active + .btn.btn-primary.nav-cta {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--white) !important;
+}
+
+.btn.btn-primary.nav-cta:focus,
+.btn.btn-primary.nav-cta:active,
+.btn.btn-primary.nav-cta.show,
+.show > .btn.btn-primary.nav-cta.dropdown-toggle {
+    box-shadow: none;
 }
 
 /* ========================================

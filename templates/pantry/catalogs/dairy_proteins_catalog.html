@@ -1,3 +1,4 @@
+{% load static %}
 <section aria-labelledby="pantry-catalog-heading">
     <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-4">
         <h2 id="pantry-catalog-heading" class="pantry-section-title mb-0">Ingredients Catalog</h2>
@@ -17,20 +18,15 @@
                          data-name="{{ p.display_name|lower }}">
                         <div class="pantry-ingtile w-100 h-100 {% if p.already_added %}pantry-ingtile--added{% endif %}">
                             <span class="pantry-ingtile-visual">
-                                {% if p.image_url %}
-                                    <img src="{{ p.image_url }}"
-                                         alt=""
-                                         class="pantry-ingtile-img"
-                                         width="56"
-                                         height="56"
-                                         loading="lazy"
-                                         decoding="async"
-                                         referrerpolicy="no-referrer"
-                                         onerror="this.classList.add('d-none'); var fb=this.parentElement && this.parentElement.querySelector('.pantry-ingtile-icon--fallback'); if (fb) { fb.classList.remove('d-none'); }">
-                                    <span class="pantry-ingtile-icon pantry-ingtile-icon--fallback d-none" aria-hidden="true"><i class="bi {{ p.icon }}"></i></span>
-                                {% else %}
-                                    <span class="pantry-ingtile-icon" aria-hidden="true"><i class="bi {{ p.icon }}"></i></span>
-                                {% endif %}
+                                <img src="{{ p.image_url }}"
+                                     alt=""
+                                     class="pantry-ingtile-img"
+                                     width="56"
+                                     height="56"
+                                     loading="lazy"
+                                     decoding="async"
+                                     referrerpolicy="no-referrer"
+                                     onerror="var item=this.closest('.pantry-catalog-item'); if(item){ item.remove(); }">
                             </span>
                             <span class="pantry-ingtile-name">{{ p.display_name }}</span>
                             {% if p.already_added %}
@@ -39,14 +35,18 @@
                             {% endif %}
 
                             <div class="pantry-ingtile-actions" aria-label="Ingredient actions">
-                                <form method="post" action="{% url 'pantry_zone' zone.slug %}" class="d-flex align-items-center gap-1 pantry-ingtile-actions-form">
+                                <form method="post" action="{% url 'pantry_zone' zone.slug %}" class="pantry-ingtile-actions-form">
                                     {% csrf_token %}
                                     <input type="hidden" name="preset_key" value="{{ p.key }}">
                                     <input type="hidden" name="return_zone" value="{{ zone.slug }}">
                                     <button type="submit" name="action" value="quick_add" class="pantry-mini-btn pantry-mini-btn--add">Add</button>
                                     <button type="submit" name="action" value="quick_remove" class="pantry-mini-btn pantry-mini-btn--remove">Remove</button>
-                                    <label class="pantry-qty-label" for="qty-{{ p.key }}">Qnt</label>
-                                    <input id="qty-{{ p.key }}" type="text" name="quantity" class="pantry-qty-input" placeholder="1" maxlength="12">
+                                    <span class="pantry-qty-label" id="qty-lbl-{{ p.key }}">Qty</span>
+                                    <div class="pantry-qty-stepper" role="group" aria-labelledby="qty-lbl-{{ p.key }}">
+                                        <button type="button" class="pantry-qty-step-btn" data-qty-step="-1" aria-label="Decrease quantity">−</button>
+                                        <input id="qty-{{ p.key }}" type="text" name="quantity" class="pantry-qty-input pantry-qty-input--stepper" value="1" maxlength="12" inputmode="numeric" readonly aria-label="Quantity">
+                                        <button type="button" class="pantry-qty-step-btn" data-qty-step="1" aria-label="Increase quantity">+</button>
+                                    </div>
                                 </form>
                             </div>
                         </div>

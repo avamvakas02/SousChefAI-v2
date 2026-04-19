@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 import re
+from recipes.ingredient_aliases import canonicalize_ingredient_name
 
 from .ingredient_service import (
     get_catalog,
@@ -19,36 +20,49 @@ from .models import PantryItem
 
 def _owned_names_lower(user):
     return {
-        n.lower()
+        (n or "").strip().lower()
         for n in PantryItem.objects.filter(user=user).values_list("name", flat=True)
+        if (n or "").strip()
     }
+
+
+def _dedupe_name_key(name: str) -> str:
+    """
+    Normalize names for catalog dedupe.
+    Collapses cosmetic variants like:
+    - "Penne Pasta" vs "Penne Pasta (Pasta)"
+    - punctuation/case differences
+    """
+    lowered = (name or "").strip().lower()
+    if not lowered:
+        return ""
+    lowered = re.sub(r"\s*\([^)]*\)\s*", " ", lowered)
+    lowered = re.sub(r"[^a-z0-9]+", " ", lowered)
+    return re.sub(r"\s+", " ", lowered).strip()
 
 
 def _presets_for_zone(user, zone):
     owned = _owned_names_lower(user)
     rows = []
     # API results can contain duplicates (same ingredient under different ids).
-    # Deduplicate by display name (and image URL when available) to prevent repeated tiles in the template.
+    # Deduplicate by display name so users still see distinct ingredients even when
+    # TheMealDB serves the same thumbnail for different names.
     seen_names = set()
-    seen_images = set()
     for key in zone["keys"]:
         parsed = lookup_preset(key)
         if not parsed:
             continue
         _, name = parsed
         name_norm = (name or "").strip().lower()
-        if not name_norm or name_norm in seen_names:
+        # Keep all source variants visible in catalog (e.g. beef brisket, minced beef).
+        # Canonical matching is for pantry equivalence, not UI card collapsing.
+        dedupe_key = _dedupe_name_key(name_norm)
+        if not dedupe_key or dedupe_key in seen_names:
             continue
 
         img_url = ingredient_image_url(name)
-        if img_url and img_url in seen_images:
-            # Sometimes the catalog contains near-duplicates that differ in name
-            # but resolve to the same thumbnail (same TheMealDB slug).
-            continue
 
-        seen_names.add(name_norm)
-        if img_url:
-            seen_images.add(img_url)
+        seen_names.add(dedupe_key)
         rows.append(
             {
                 "key": key,
@@ -92,8 +106,14 @@ _GROUP_ALIASES = (
     ("sugar", ("sugar",)),
     ("salt", ("salt",)),
 )
-CATALOG_INITIAL_VISIBLE = 14
-CATALOG_SHOW_MORE_STEP = 15
+CATALOG_INITIAL_VISIBLE = 60
+CATALOG_SHOW_MORE_STEP = 30
+
+_CATALOG_CATEGORY_ROWS = (
+    ("produce", "Produce"),
+    ("dairy_proteins", "Dairy & Proteins"),
+    ("pantry_staples", "Pantry Staples"),
+)
 
 
 def _group_heading_for_name(name: str) -> str:
@@ -116,58 +136,83 @@ def _group_heading_for_name(name: str) -> str:
         if any(alias in lowered or alias in token_set for alias in aliases):
             return heading.title()
 
-    # Fallback: group by first word so nearby variants still cluster.
+    # Fallback: use canonical ingredient family when available ("baby squid" -> "Squid").
+    canonical = canonicalize_ingredient_name(name or "")
+    if canonical:
+        return canonical.title()
     first = tokens[0]
     return first.capitalize()
 
 
 def _group_presets(rows):
     groups = {}
-    order = []
     for row in rows:
         heading = _group_heading_for_name(row.get("name", ""))
         row["display_name"] = _display_name_for_heading(row.get("name", ""), heading)
         if heading not in groups:
             groups[heading] = []
-            order.append(heading)
         groups[heading].append(row)
-    return [{"heading": heading, "items": groups[heading]} for heading in order]
+    grouped_rows = []
+    for heading in sorted(groups.keys(), key=lambda h: h.lower()):
+        items = sorted(
+            groups[heading],
+            key=lambda r: (r.get("display_name") or r.get("name") or "").lower(),
+        )
+        grouped_rows.append({"heading": heading, "items": items})
+    return grouped_rows
 
 
 def _display_name_for_heading(name: str, heading: str) -> str:
     """
-    Normalize card labels to "<Heading> (<variant>)" where possible.
-    Example: "Baby Plum Tomatoes" -> "Tomatoes (Baby Plum)"
+    Keep source-provided card labels as-is (e.g. "Name (Type)").
+    Group headings still organize rows, but item labels are not reshaped.
     """
     raw = (name or "").strip()
     if not raw:
-        return heading
-
-    heading_clean = (heading or "").strip()
-    if not heading_clean:
-        return raw
-
-    raw_lower = raw.lower()
-    head_lower = heading_clean.lower()
-
-    if raw_lower == head_lower:
-        return heading_clean
-
-    variant = raw
-    if raw_lower.endswith(" " + head_lower):
-        variant = raw[: -(len(head_lower) + 1)].strip(" -_,")
-    elif raw_lower.startswith(head_lower + " "):
-        variant = raw[len(head_lower) + 1 :].strip(" -_,")
-
-    if not variant or variant.lower() == head_lower:
-        return heading_clean
-    return f"{heading_clean} ({variant})"
+        return (heading or "").strip()
+    return raw
 
 
 def _catalog_display_name(stored_name: str) -> str:
     """Match catalog card labels: same rules as preset display_name."""
     heading = _group_heading_for_name(stored_name)
     return _display_name_for_heading(stored_name, heading)
+
+
+def _quick_add_groups(catalog_lookup: dict, owned_names: set[str]) -> list[dict]:
+    """Build grouped quick-add cards for pantry home (same structure as catalog cards)."""
+    by_name = {}
+    for key, payload in catalog_lookup.items():
+        if not payload or len(payload) < 2:
+            continue
+        name = (payload[1] or "").strip()
+        if not name:
+            continue
+        name_key = name.lower()
+        dedupe_key = _dedupe_name_key(name)
+        if dedupe_key in by_name:
+            continue
+        heading = _group_heading_for_name(name)
+        by_name[dedupe_key] = {
+            "key": key,
+            "name": name,
+            "display_name": _display_name_for_heading(name, heading),
+            "heading": heading,
+            "icon": resolve_icon(key, name),
+            "image_url": ingredient_image_url(name),
+            "already_added": name_key in owned_names,
+        }
+    groups = {}
+    for row in by_name.values():
+        heading = row["heading"]
+        if heading not in groups:
+            groups[heading] = []
+        groups[heading].append(row)
+    grouped_rows = []
+    for heading in sorted(groups.keys(), key=lambda h: h.lower()):
+        items = sorted(groups[heading], key=lambda r: (r.get("display_name") or "").lower())
+        grouped_rows.append({"heading": heading, "items": items})
+    return grouped_rows
 
 
 def _redirect_after_zone_catalog_post(request) -> HttpResponseRedirect:
@@ -182,13 +227,37 @@ def _redirect_after_zone_catalog_post(request) -> HttpResponseRedirect:
     return redirect("pantry")
 
 
+def _categories_for_catalog_filter(filter_value: str) -> tuple[str, ...]:
+    v = (filter_value or "").strip()
+    if v == "produce":
+        return (PantryItem.Category.PRODUCE,)
+    if v == "dairy_proteins":
+        return (PantryItem.Category.DAIRY, PantryItem.Category.PROTEINS)
+    if v == "pantry_staples":
+        return (PantryItem.Category.PANTRY, PantryItem.Category.SPICES)
+    # Backward-compatible support for old/raw category query params.
+    valid_raw = {c for c, _ in PantryItem.Category.choices}
+    if v in valid_raw:
+        return (v,)
+    return ()
+
+
+def _catalog_category_label_for_item(category_value: str) -> str:
+    if category_value == PantryItem.Category.PRODUCE:
+        return "Produce"
+    if category_value in (PantryItem.Category.DAIRY, PantryItem.Category.PROTEINS):
+        return "Dairy & Proteins"
+    if category_value in (PantryItem.Category.PANTRY, PantryItem.Category.SPICES):
+        return "Pantry Staples"
+    return dict(PantryItem.Category.choices).get(category_value, "Other")
+
+
 def _redirect_pantry_inventory_after_change(request) -> HttpResponseRedirect:
     """Return to pantry list preserving category filter; fragment lands on the inventory block."""
     cat = (request.GET.get("category") or request.POST.get("return_category") or "").strip()
-    valid_categories = {c for c, _ in PantryItem.Category.choices}
     base = reverse("pantry")
     frag = "#pantry-inventory-heading"
-    if cat in valid_categories:
+    if _categories_for_catalog_filter(cat):
         return HttpResponseRedirect(f"{base}?category={cat}{frag}")
     return HttpResponseRedirect(f"{base}{frag}")
 
@@ -206,10 +275,10 @@ def _pantry_inventory_ajax(request) -> bool:
 def _remaining_in_pantry_view_count(request) -> int:
     """Item count for the current pantry list filter (GET category or POST return_category)."""
     category_filter = (request.GET.get("category") or request.POST.get("return_category") or "").strip()
-    valid_categories = {c for c, _ in PantryItem.Category.choices}
     qs = PantryItem.objects.filter(user=request.user)
-    if category_filter in valid_categories:
-        qs = qs.filter(category=category_filter)
+    raw_categories = _categories_for_catalog_filter(category_filter)
+    if raw_categories:
+        qs = qs.filter(category__in=raw_categories)
     return qs.count()
 
 
@@ -351,27 +420,37 @@ def pantry_home(request):
     category_filter = (request.GET.get("category") or "").strip()
 
     qs = PantryItem.objects.filter(user=request.user)
-    valid_categories = {c for c, _ in PantryItem.Category.choices}
-    if category_filter in valid_categories:
-        qs = qs.filter(category=category_filter)
+    raw_categories = _categories_for_catalog_filter(category_filter)
+    if raw_categories:
+        qs = qs.filter(category__in=raw_categories)
 
     items = list(qs)
     for row in items:
         row.catalog_display_name = _catalog_display_name(row.name)
-    counts = {c: 0 for c, _ in PantryItem.Category.choices}
+        row.catalog_category_display = _catalog_category_label_for_item(row.category)
+    counts = {key: 0 for key, _ in _CATALOG_CATEGORY_ROWS}
     for row in (
         PantryItem.objects.filter(user=request.user)
         .values("category")
         .annotate(total=Count("id"))
     ):
-        counts[row["category"]] = row["total"]
+        cat = row["category"]
+        total = row["total"]
+        if cat == PantryItem.Category.PRODUCE:
+            counts["produce"] += total
+        elif cat in (PantryItem.Category.DAIRY, PantryItem.Category.PROTEINS):
+            counts["dairy_proteins"] += total
+        elif cat in (PantryItem.Category.PANTRY, PantryItem.Category.SPICES):
+            counts["pantry_staples"] += total
 
     category_rows = [
         (value, label, counts.get(value, 0))
-        for value, label in PantryItem.Category.choices
+        for value, label in _CATALOG_CATEGORY_ROWS
     ]
 
+    owned_names = _owned_names_lower(request.user)
     catalog = get_catalog()
+    quick_add_groups = _quick_add_groups(catalog.get("lookup", {}), owned_names)
 
     response = render(
         request,
@@ -381,6 +460,7 @@ def pantry_home(request):
             "category_filter": category_filter,
             "category_rows": category_rows,
             "zones": catalog["zones"],
+            "quick_add_groups": quick_add_groups,
             "ingredient_catalog_source": catalog.get("source", "static"),
         },
     )

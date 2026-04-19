@@ -1,14 +1,4 @@
-"""
-django-allauth: resolve duplicate SocialApp configuration.
 
-If Google credentials exist in SOCIALACCOUNT_PROVIDERS (env) *and* a Social
-application row exists in the admin, list_apps returns two apps and get_app
-raises MultipleObjectsReturned. We prefer the settings-defined app so one
-source of truth is enough.
-
-If multiple DB-backed apps remain (no settings app), tell the operator to
-deduplicate in Admin.
-"""
 
 from django.core.exceptions import ImproperlyConfigured
 

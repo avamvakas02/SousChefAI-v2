@@ -1,11 +1,17 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
 
+from subscriptions.models import CustomerSubscription
+from subscriptions.permissions import require_plan
+from subscriptions.quota import merge_anonymous_recipe_usage
+
+from .forms import AccountSettingsForm
 from .models import UserProfile
 
 
@@ -25,6 +31,13 @@ def _safe_next(request) -> str:
 
 def _social_auth_enabled() -> bool:
     return bool(getattr(settings, "ALLAUTH_ENABLED", False))
+
+
+def _default_auth_backend() -> str:
+    backends = getattr(settings, "AUTHENTICATION_BACKENDS", ())
+    if isinstance(backends, (list, tuple)) and backends:
+        return str(backends[0])
+    return "django.contrib.auth.backends.ModelBackend"
 
 
 @require_http_methods(["GET", "POST"])
@@ -49,7 +62,11 @@ def login_view(request):
         messages.error(request, "Invalid username or password.")
         return render(request, "users/login.html", login_ctx)
 
+    if not request.session.session_key:
+        request.session.save()
+    pre_session_key = request.session.session_key
     auth_login(request, user)
+    merge_anonymous_recipe_usage(user, pre_session_key)
     messages.success(request, "Welcome back!")
     nxt = _safe_next(request)
     return redirect(nxt or "/")
@@ -99,14 +116,60 @@ def register_view(request):
     if skill_level in UserProfile.SkillLevel.values:
         profile.skill_level = skill_level
         profile.save(update_fields=["skill_level", "updated_at"])
-    auth_login(request, user)
+    if not request.session.session_key:
+        request.session.save()
+    pre_session_key = request.session.session_key
+    auth_login(request, user, backend=_default_auth_backend())
+    merge_anonymous_recipe_usage(user, pre_session_key)
     messages.success(request, "Account created. Welcome!")
     return redirect(request.GET.get("next") or "/")
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def account_settings(request):
-    return render(request, "users/account_settings.html")
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    edit_mode = request.method == "POST" or request.GET.get("edit") == "1"
+
+    if request.method == "POST":
+        form = AccountSettingsForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your account settings were updated.")
+            return redirect("account_settings")
+        messages.error(request, "Please fix the highlighted fields and try again.")
+        edit_mode = True
+    else:
+        form = AccountSettingsForm(
+            user=request.user,
+            initial={
+                "first_name": request.user.first_name,
+                "last_name": request.user.last_name,
+                "birthday": profile.birthday.strftime("%d/%m/%Y") if profile.birthday else "",
+                "username": request.user.username,
+                "email": request.user.email,
+                "skill_level": profile.skill_level,
+            },
+        )
+
+    account_info = {
+        "first_name": request.user.first_name or "Not set",
+        "last_name": request.user.last_name or "Not set",
+        "username": request.user.username or "Not set",
+        "email": request.user.email or "Not set",
+        "birthday": profile.birthday.strftime("%d/%m/%Y") if profile.birthday else "Not set",
+        "skill_level": profile.get_skill_level_display() or "Not set",
+    }
+
+    return render(
+        request,
+        "users/account_settings.html",
+        {
+            "form": form,
+            "edit_mode": edit_mode,
+            "account_info": account_info,
+        },
+    )
 
 
 @login_required
@@ -126,3 +189,40 @@ def delete_account(request):
     user.delete()
     messages.success(request, f"Your account '{username}' has been permanently deleted.")
     return redirect("/")
+
+
+@login_required
+@require_plan(CustomerSubscription.Plan.REGULAR)
+def profile_view(request):
+    from recipes.models import FavoriteRecipe
+    favorite_recipes = FavoriteRecipe.objects.filter(user=request.user).order_by('-created_at')
+    
+    return render(
+        request,
+        "users/profile.html",
+        {
+            "favorite_recipes": favorite_recipes,
+        }
+    )
+
+
+@login_required
+def profile_settings_menu(request):
+    return render(request, "users/profile_settings_menu.html")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def password_change_view(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            updated_user = form.save()
+            update_session_auth_hash(request, updated_user)
+            messages.success(request, "Your password has been updated successfully.")
+            return redirect("password_change")
+        messages.error(request, "Please fix the highlighted fields and try again.")
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(request, "users/password_change.html", {"form": form})

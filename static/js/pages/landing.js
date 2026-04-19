@@ -1,5 +1,5 @@
 /**
- * Home / landing page–specific behavior.
+ * Home / landing page-specific behavior.
  */
 (function () {
     'use strict';

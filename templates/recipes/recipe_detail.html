@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Recipe Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/recipes/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<section
+  class="recipe-detail-page"
+  data-discovery-url="{% url 'recipe_discovery_page' %}"
+>
+  <div class="container recipe-detail-container">
+    <a id="backToDiscoveryLink" class="back-link" href="{% url 'recipe_discovery_page' %}">
+      <i class="bi bi-arrow-left"></i> Back to discovery
+    </a>
+    <article class="recipe-detail-card">
+      <img id="recipeDetailImage" class="recipe-detail-image" alt="Recipe image">
+      <div class="recipe-detail-content">
+        <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+          <h1 id="recipeDetailTitle" style="margin-bottom: 0;">Recipe details</h1>
+          <button id="favoriteBtn" class="recipe-favorite-btn p-2 rounded-circle" style="line-height:1;" title="Toggle Favorite" onclick="toggleFavoriteState()">
+             <i id="favoriteIcon" class="bi bi-heart" style="font-size: 1.3rem;"></i>
+          </button>
+        </div>
+        <p id="recipeDetailDescription" class="recipe-detail-description"></p>
+
+        <div class="detail-meta-grid">
+          <div class="detail-meta-item">
+            <img src="{% static 'images/icons/rcard_time.png' %}" alt="Time icon">
+            <span id="recipeDetailTime">-</span>
+          </div>
+          <div class="detail-meta-item">
+            <img src="{% static 'images/icons/rcard_difficuty.png' %}" alt="Difficulty icon">
+            <span id="recipeDetailDifficulty">Easy</span>
+          </div>
+          <div class="detail-meta-item">
+            <img src="{% static 'images/icons/rcard_portion.png' %}" alt="Portions icon">
+            <span id="recipeDetailServings">2</span>
+          </div>
+          <div class="detail-meta-item">
+            <img src="{% static 'images/icons/rcard_pantry_match.png' %}" alt="Match icon">
+            <span id="recipeDetailMatch">0%</span>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <div class="detail-section h-100">
+              <h3><i class="bi bi-check2-circle text-success me-2"></i>Used pantry</h3>
+              <p id="recipeDetailUsed">None</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="detail-section h-100">
+              <h3><i class="bi bi-cart-x text-danger me-2"></i>Missing ingredients</h3>
+              <p id="recipeDetailMissing">None</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Why this recipe</h3>
+          <p id="recipeDetailWhy"></p>
+        </div>
+
+        <div id="recipeDetailMacrosContainer" class="detail-section macros-section d-none">
+          <h3>Nutritional Information <small>(Estimated)</small></h3>
+          <div class="macros-grid" id="recipeDetailMacros"></div>
+        </div>
+
+        <div id="recipeDetailEquipmentContainer" class="detail-section d-none">
+          <h3>Equipment Needed</h3>
+          <ul id="recipeDetailEquipment" class="equipment-list"></ul>
+        </div>
+        
+        <div class="chef-tip-card d-none" id="recipeDetailChefTipContainer">
+          <div class="chef-tip-header">
+             <i class="bi bi-stars"></i> Pro Chef Tip
+          </div>
+          <p id="recipeDetailChefTip"></p>
+        </div>
+
+        <div class="detail-section mt-5">
+          <h3>Cooking Instructions</h3>
+          <div id="recipeDetailSteps" class="interactive-steps-list"></div>
+        </div>
+
+      </div>
+    </article>
+  </div>
+</section>
+
+<script src="{% static 'js/recipes/detail.js' %}"></script>
+{% endblock %}

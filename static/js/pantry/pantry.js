@@ -1,5 +1,5 @@
 /**
- * Pantry list and zone catalog–specific behavior.
+ * Pantry list and zone catalog-specific behavior.
  */
 (function () {
     'use strict';
@@ -84,6 +84,92 @@
 
     searchInput.addEventListener('input', updateAllGroups);
     updateAllGroups();
+}());
+
+(function () {
+    'use strict';
+
+    var searchInput = document.getElementById('pantry-home-catalog-search');
+    var groups = Array.prototype.slice.call(document.querySelectorAll('[data-home-catalog-group]'));
+    var items = Array.prototype.slice.call(document.querySelectorAll('[data-home-catalog-item]'));
+    var hintEl = document.getElementById('pantry-home-search-hint');
+    var emptyEl = document.getElementById('pantry-home-search-empty');
+
+    if (!searchInput || !items.length || !groups.length) {
+        return;
+    }
+
+    function updateHomeQuickCatalog() {
+        var query = (searchInput.value || '').trim().toLowerCase();
+        var totalMatches = 0;
+        var hasQuery = query.length > 0;
+
+        items.forEach(function (item) {
+            var name = (item.getAttribute('data-name') || '').toLowerCase();
+            var matches = hasQuery && name.indexOf(query) !== -1;
+            if (matches) {
+                totalMatches += 1;
+            }
+            item.classList.toggle('d-none', !matches);
+        });
+
+        groups.forEach(function (group) {
+            var groupItems = Array.prototype.slice.call(group.querySelectorAll('[data-home-catalog-item]'));
+            var groupHasVisible = hasQuery && groupItems.some(function (item) {
+                return !item.classList.contains('d-none');
+            });
+            group.classList.toggle('d-none', !groupHasVisible);
+        });
+
+        if (hintEl) {
+            hintEl.classList.toggle('d-none', hasQuery);
+        }
+        if (emptyEl) {
+            emptyEl.classList.toggle('d-none', !hasQuery || totalMatches > 0);
+        }
+    }
+
+    searchInput.addEventListener('input', updateHomeQuickCatalog);
+    updateHomeQuickCatalog();
+}());
+
+(function () {
+    'use strict';
+    var root = document.getElementById('pantry-home-root');
+    if (!root) {
+        return;
+    }
+    root.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest('[data-qty-step]') : null;
+        if (!btn || !root.contains(btn)) {
+            return;
+        }
+        var delta = parseInt(btn.getAttribute('data-qty-step'), 10);
+        if (!delta) {
+            return;
+        }
+        var wrap = btn.closest('.pantry-qty-stepper');
+        if (!wrap) {
+            return;
+        }
+        var input = wrap.querySelector('input[name="quantity"]');
+        if (!input) {
+            return;
+        }
+        e.preventDefault();
+        var n = parseInt(String(input.value || '').trim(), 10);
+        var v = Number.isFinite(n) && n > 0 ? n : 1;
+        v += delta;
+        if (v < 1) {
+            v = 1;
+        }
+        var maxLen = parseInt(input.getAttribute('maxlength'), 10) || 12;
+        var maxVal = Math.pow(10, maxLen) - 1;
+        if (v > maxVal) {
+            v = maxVal;
+        }
+        input.value = String(v);
+    });
 }());
 
 (function () {
@@ -197,6 +283,41 @@
         }
     }
 
+    function parseQtyStepperInt(raw) {
+        var n = parseInt(String(raw || '').trim(), 10);
+        return Number.isFinite(n) && n > 0 ? n : 1;
+    }
+
+    zoneRoot.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest('[data-qty-step]') : null;
+        if (!btn || !zoneRoot.contains(btn)) {
+            return;
+        }
+        var delta = parseInt(btn.getAttribute('data-qty-step'), 10);
+        if (!delta) {
+            return;
+        }
+        var wrap = btn.closest('.pantry-qty-stepper');
+        if (!wrap) {
+            return;
+        }
+        var input = wrap.querySelector('input[name="quantity"]');
+        if (!input) {
+            return;
+        }
+        e.preventDefault();
+        var v = parseQtyStepperInt(input.value) + delta;
+        if (v < 1) {
+            v = 1;
+        }
+        var maxLen = parseInt(input.getAttribute('maxlength'), 10) || 12;
+        var maxVal = Math.pow(10, maxLen) - 1;
+        if (v > maxVal) {
+            v = maxVal;
+        }
+        input.value = String(v);
+    });
+
     zoneRoot.querySelectorAll('.pantry-ingtile-actions-form').forEach(function (form) {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -215,6 +336,9 @@
             }
             form.setAttribute('data-pantry-quick-busy', '1');
             form.querySelectorAll('button[type="submit"]').forEach(function (b) {
+                b.disabled = true;
+            });
+            form.querySelectorAll('.pantry-qty-step-btn').forEach(function (b) {
                 b.disabled = true;
             });
             // Always build from the form node only — FormData(form, submitter) is flaky in some
@@ -276,6 +400,9 @@
                 .finally(function () {
                     form.removeAttribute('data-pantry-quick-busy');
                     form.querySelectorAll('button[type="submit"]').forEach(function (b) {
+                        b.disabled = false;
+                    });
+                    form.querySelectorAll('.pantry-qty-step-btn').forEach(function (b) {
                         b.disabled = false;
                     });
                 });

@@ -2,34 +2,152 @@
 {% load static %}
 
 {% block title %}Account Settings — SousChefAI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users/account_settings.css' %}">
+{% endblock %}
 
 {% block content %}
-<section class="py-5">
+<section class="account-settings-page py-5">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <div class="account-card p-4 rounded-4 bg-white shadow-sm">
-                    <h1 class="mb-3">Account Settings</h1>
-                    <p class="text-muted mb-4">
-                        You are logged in as <strong>{{ request.user.username }}</strong>.
-                        From here you can safely log out or permanently delete your account.
-                    </p>
+        <div class="row justify-content-center g-4">
+            <div class="col-xl-10">
+                <div class="settings-shell p-4 p-lg-5 rounded-4">
+                    <h1 class="mb-2">My Account</h1>
+                    <p class="settings-subtitle mb-4">View your account details and update them when needed.</p>
 
-                    <div class="d-flex flex-column gap-3">
-                        <form method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-hero-primary w-100">
-                                Log out
-                            </button>
-                        </form>
+                    {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
 
-                        <form method="post" action="{% url 'delete_account' %}"
-                              data-confirm-message="Are you sure you want to permanently delete your account? This cannot be undone.">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger w-100">
-                                Permanently delete my account
-                            </button>
-                        </form>
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div id="account-preferences" class="settings-panel settings-panel-main rounded-4 p-4 h-100">
+                                <h2 class="h5 mb-3">Account Information</h2>
+                                {% if edit_mode %}
+                                    <form method="post" action="{% url 'account_settings' %}" novalidate>
+                                        {% csrf_token %}
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First name</label>
+                                                <input type="text" name="{{ form.first_name.name }}" id="{{ form.first_name.id_for_label }}"
+                                                       class="form-control settings-input{% if form.first_name.errors %} is-invalid{% endif %}"
+                                                       value="{{ form.first_name.value|default_if_none:'' }}">
+                                                {% for err in form.first_name.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last name</label>
+                                                <input type="text" name="{{ form.last_name.name }}" id="{{ form.last_name.id_for_label }}"
+                                                       class="form-control settings-input{% if form.last_name.errors %} is-invalid{% endif %}"
+                                                       value="{{ form.last_name.value|default_if_none:'' }}">
+                                                {% for err in form.last_name.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.birthday.id_for_label }}" class="form-label">Birthday (dd/mm/yyyy)</label>
+                                                <input type="text" name="{{ form.birthday.name }}" id="{{ form.birthday.id_for_label }}"
+                                                       class="form-control settings-input{% if form.birthday.errors %} is-invalid{% endif %}"
+                                                       value="{{ form.birthday.value|default_if_none:'' }}" placeholder="DD/MM/YYYY">
+                                                {% for err in form.birthday.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.username.id_for_label }}" class="form-label">Alias (username)</label>
+                                                <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}"
+                                                       class="form-control settings-input{% if form.username.errors %} is-invalid{% endif %}"
+                                                       value="{{ form.username.value|default_if_none:'' }}" required>
+                                                {% for err in form.username.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                                <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}"
+                                                       class="form-control settings-input{% if form.email.errors %} is-invalid{% endif %}"
+                                                       value="{{ form.email.value|default_if_none:'' }}">
+                                                {% for err in form.email.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="{{ form.skill_level.id_for_label }}" class="form-label">Cooking skill level</label>
+                                                <select name="{{ form.skill_level.name }}" id="{{ form.skill_level.id_for_label }}"
+                                                        class="form-select settings-input{% if form.skill_level.errors %} is-invalid{% endif %}">
+                                                    {% for val, label in form.fields.skill_level.choices %}
+                                                        <option value="{{ val }}" {% if form.skill_level.value == val %}selected{% endif %}>{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                {% for err in form.skill_level.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2 mt-4">
+                                            <a href="{% url 'account_settings' %}" class="btn btn-cancel">Cancel</a>
+                                            <button type="submit" class="btn btn-hero-primary">Save profile settings</button>
+                                        </div>
+                                    </form>
+                                {% else %}
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">First Name</label>
+                                            <input type="text" class="form-control settings-input" value="{{ account_info.first_name }}" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Last Name</label>
+                                            <input type="text" class="form-control settings-input" value="{{ account_info.last_name }}" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Birthday (dd/mm/yyyy)</label>
+                                            <input type="text" class="form-control settings-input" value="{{ account_info.birthday }}" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Alias (username)</label>
+                                            <input type="text" class="form-control settings-input" value="{{ account_info.username }}" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email</label>
+                                            <input type="text" class="form-control settings-input" value="{{ account_info.email }}" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Cooking Skill Level</label>
+                                            <input type="text" class="form-control settings-input" value="{{ account_info.skill_level }}" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <a href="{% url 'account_settings' %}?edit=1" class="btn btn-hero-primary">Edit My Account</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <div id="account-security" class="settings-panel rounded-4 p-4 mb-3">
+                                <h2 class="h6 mb-2">Security</h2>
+                                <p class="settings-muted small mb-3">Change password and review account access settings.</p>
+                                <a class="btn btn-outline-primary btn-sm settings-btn-secondary" href="{% url 'password_change' %}">Change password</a>
+                            </div>
+
+                            <div class="settings-panel rounded-4 p-4 mb-3">
+                                <h2 class="h6 mb-2">Subscription and Billing</h2>
+                                <p class="settings-muted small mb-3">Manage plan, payment method, invoices and renewals.</p>
+                                <a class="btn btn-outline-primary btn-sm me-2 settings-btn-secondary" href="{% url 'pricing' %}">View plans</a>
+                                <a class="btn btn-outline-secondary btn-sm settings-btn-secondary" href="{% url 'subscriptions_portal' %}">Billing portal</a>
+                            </div>
+
+                            <div class="settings-panel rounded-4 p-4 mb-3">
+                                <h2 class="h6 mb-2">Privacy and Notifications</h2>
+                                <p class="settings-muted small mb-2">Coming next: notification preferences, data export, and account privacy toggles.</p>
+                            </div>
+
+                            <div class="settings-panel settings-panel-danger rounded-4 p-4">
+                                <h2 class="h6 mb-3 text-danger">Danger Zone</h2>
+                                <form method="post" action="{% url 'logout' %}" class="mb-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-dark w-100">Log out</button>
+                                </form>
+                                <form method="post" action="{% url 'delete_account' %}"
+                                      data-confirm-message="Are you sure you want to permanently delete your account? This cannot be undone.">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger w-100">Permanently delete account</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -39,6 +157,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/account.js' %}"></script>
+<script src="{% static 'js/users/account.js' %}"></script>
 {% endblock %}
 

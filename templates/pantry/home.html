@@ -4,7 +4,8 @@
 {% block title %}SousChefAI/Pantry{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+<link rel="stylesheet" href="{% static 'css/pantry/pantry.css' %}">
+<link rel="stylesheet" href="{% static 'css/pantry/home.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -114,6 +115,91 @@
             </div>
         </section>
 
+        <section class="pantry-section mb-5" aria-labelledby="pantry-quick-add-heading">
+            <div class="pantry-quick-add-card card border-0 shadow-sm">
+                <div class="card-body p-4 p-lg-4">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div>
+                            <h2 id="pantry-quick-add-heading" class="pantry-section-title mb-1">Quick Add Ingredients</h2>
+                            <p class="pantry-section-desc mb-0">Search and instantly filter ingredients like the catalog view, then add right here.</p>
+                        </div>
+                    </div>
+                    <div id="pantry-home-catalog-controls"
+                         class="pantry-catalog-controls pantry-home-catalog-controls mb-4"
+                         data-home-catalog-controls>
+                        <label for="pantry-home-catalog-search" class="form-label pantry-control-label mb-2">Find ingredients and add them right away.</label>
+                        <div class="input-group input-group-lg pantry-quick-add-input-wrap">
+                            <span class="input-group-text" aria-hidden="true"><i class="bi bi-search"></i></span>
+                            <input id="pantry-home-catalog-search"
+                                   type="search"
+                                   class="form-control"
+                                   placeholder="Search ingredients you are looking for..."
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                    <p id="pantry-home-search-hint" class="text-muted small mb-3">Start typing to see matching ingredients and their types.</p>
+                    <p id="pantry-home-search-empty" class="text-muted small mb-0 d-none">No ingredient matches your search.</p>
+
+                    {% for group in quick_add_groups %}
+                        <div class="pantry-catalog-group mt-4 d-none" data-home-catalog-group>
+                            <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                                <h3 class="h6 text-uppercase text-muted fw-semibold mb-0">{{ group.heading }}</h3>
+                                <span class="text-muted small">{{ group.items|length }}</span>
+                            </div>
+                            <div class="row g-3 g-md-4 pantry-ing-grid">
+                                {% for opt in group.items %}
+                                    <div class="col-6 col-md-4 col-lg-3 pantry-catalog-item d-none"
+                                         data-home-catalog-item
+                                         data-name="{{ opt.display_name|lower }}">
+                                        <div class="pantry-ingtile w-100 h-100 {% if opt.already_added %}pantry-ingtile--added{% endif %}">
+                                            <span class="pantry-ingtile-visual">
+                                                {% if opt.image_url %}
+                                                    <img src="{{ opt.image_url }}"
+                                                         alt=""
+                                                         class="pantry-ingtile-img"
+                                                         width="56"
+                                                         height="56"
+                                                         loading="lazy"
+                                                         decoding="async"
+                                                         referrerpolicy="no-referrer"
+                                                         onerror="this.classList.add('d-none'); var fb=this.parentElement && this.parentElement.querySelector('.pantry-ingtile-icon--fallback'); if (fb) { fb.classList.remove('d-none'); }">
+                                                    <span class="pantry-ingtile-icon pantry-ingtile-icon--fallback d-none" aria-hidden="true"><i class="bi {{ opt.icon }}"></i></span>
+                                                {% else %}
+                                                    <span class="pantry-ingtile-icon" aria-hidden="true"><i class="bi {{ opt.icon }}"></i></span>
+                                                {% endif %}
+                                            </span>
+                                            <span class="pantry-ingtile-name">{{ opt.display_name }}</span>
+                                            {% if opt.already_added %}
+                                                <span class="pantry-ingtile-added-mark" title="In your pantry" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                                <span class="pantry-ingtile-badge">In pantry</span>
+                                            {% endif %}
+
+                                            <div class="pantry-ingtile-actions" aria-label="Ingredient actions">
+                                                <form method="post" action="{% url 'pantry' %}" class="pantry-ingtile-actions-form">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="preset_key" value="{{ opt.key }}">
+                                                    <button type="submit" name="action" value="quick_add" class="pantry-mini-btn pantry-mini-btn--add">Add</button>
+                                                    <button type="submit" name="action" value="quick_remove" class="pantry-mini-btn pantry-mini-btn--remove">Remove</button>
+                                                    <span class="pantry-qty-label" id="home-qty-lbl-{{ forloop.parentloop.counter }}-{{ forloop.counter }}">Qty</span>
+                                                    <div class="pantry-qty-stepper" role="group" aria-labelledby="home-qty-lbl-{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                                        <button type="button" class="pantry-qty-step-btn" data-qty-step="-1" aria-label="Decrease quantity">−</button>
+                                                        <input id="home-qty-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" type="text" name="quantity" class="pantry-qty-input pantry-qty-input--stepper" value="1" maxlength="12" inputmode="numeric" readonly aria-label="Quantity">
+                                                        <button type="button" class="pantry-qty-step-btn" data-qty-step="1" aria-label="Increase quantity">+</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted small mt-3">No quick-add ingredients are available right now.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
         <section class="pantry-section" aria-labelledby="pantry-inventory-heading">
             <div class="pantry-inventory-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
                 <div>
@@ -191,18 +277,18 @@
                                         <td>
                                             <span class="pantry-table-name">{{ item.catalog_display_name }}</span>
                                             <div class="pantry-table-subline small text-muted mt-1 d-lg-none">
-                                                {{ item.get_category_display }}
-                                                {% if item.quantity %}<span class="mx-1">•</span>Qty: {{ item.quantity }}{% endif %}
+                                                {{ item.catalog_category_display }}
+                                                <span class="mx-1">•</span>Qty: {{ item.quantity|default:"1" }}
                                             </div>
                                             {% if item.notes %}
                                                 <div class="pantry-table-subline small text-muted mt-1">{{ item.notes }}</div>
                                             {% endif %}
                                         </td>
                                         <td class="d-none d-md-table-cell">
-                                            <span class="pantry-table-cat">{{ item.get_category_display }}</span>
+                                            <span class="pantry-table-cat">{{ item.catalog_category_display }}</span>
                                         </td>
                                         <td class="d-none d-lg-table-cell text-end text-muted small">
-                                            {% if item.quantity %}{{ item.quantity }}{% else %}—{% endif %}
+                                            {{ item.quantity|default:"1" }}
                                         </td>
                                         <td class="text-end">
                                             <form method="post" action="{% url 'pantry' %}{% if category_filter %}?category={{ category_filter }}{% endif %}" class="d-inline">
@@ -223,11 +309,17 @@
                 {% endif %}
             </div>
 
+            <div class="pantry-generate-action d-flex justify-content-center mt-5 mb-2">
+                <a href="{% url 'recipe_discovery_page' %}?auto_generate=true" class="btn recipe-magic-btn">
+                    <i class="bi bi-stars me-2"></i> Generate Recipes
+                </a>
+            </div>
+
         </section>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/pantry.js' %}"></script>
+<script src="{% static 'js/pantry/pantry.js' %}"></script>
 {% endblock %}
