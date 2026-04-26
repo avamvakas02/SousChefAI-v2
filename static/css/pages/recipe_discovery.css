@@ -1,0 +1,438 @@
+.recipe-discovery-page {
+    background: #f8fafc;
+}
+
+.rd-hero {
+    border-radius: 1rem;
+}
+
+.rd-kicker {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.rd-title {
+    font-weight: 700;
+}
+
+.rd-pantry-badge {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.85rem;
+}
+
+.rd-recommendations {
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #fff 0%, #fff7ed 100%);
+}
+
+.rd-carousel-controls {
+    flex: 0 0 auto;
+}
+
+.rd-refresh-counter {
+    border: 1px solid #fed7aa;
+    border-radius: 999px;
+    background: rgba(255, 247, 237, 0.9);
+    color: #7c2d12;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.8rem;
+    white-space: nowrap;
+}
+
+.rd-refresh-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #9a3412;
+}
+
+.rd-refresh-counter strong {
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+}
+
+.rd-carousel-btn {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rd-recommendation-carousel {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    padding: 0.15rem 0.15rem 0.75rem;
+}
+
+.rd-recommendation-slide {
+    flex: 0 0 min(100%, 18rem);
+    scroll-snap-align: start;
+}
+
+.rd-recipe-card {
+    border-radius: 0.85rem;
+}
+
+.rd-card-image {
+    aspect-ratio: 4 / 2.7;
+    object-fit: cover;
+}
+
+.rd-regenerate-panel {
+    border-radius: 0.85rem;
+}
+
+.rd-recipe-card .card-body {
+    padding: 0.9rem;
+}
+
+.rd-recipe-card .card-title {
+    font-size: 1.05rem;
+    margin-bottom: 0.45rem;
+}
+
+.rd-description {
+    font-size: 0.84rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.7em;
+}
+
+.rd-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.65rem;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 0.6rem;
+}
+
+.rd-stats li {
+    color: #4b5563;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.rd-stats i {
+    margin-right: 0.2rem !important;
+}
+
+.rd-detail-image {
+    max-height: 360px;
+    object-fit: cover;
+    object-position: center;
+}
+.recipe-discovery {
+    background: #f8f5f2;
+}
+
+.recipe-discovery-header {
+    max-width: 740px;
+}
+
+.recipe-discovery-kicker {
+    color: #9b5d2d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.82rem;
+}
+
+.recipe-discovery-title {
+    font-weight: 800;
+    color: #2f1f16;
+}
+
+.recipe-discovery-subtitle {
+    color: #6c5f58;
+}
+
+.recipe-discovery-action {
+    border-radius: 1rem;
+}
+
+.daily-recommendations {
+    border-radius: 1rem;
+    background: linear-gradient(140deg, #fffdfb 0%, #fff7f1 100%);
+}
+
+.daily-recommendations-title {
+    color: #2f1f16;
+    font-weight: 800;
+    font-size: 1.4rem;
+}
+
+.daily-recommendations-subtitle {
+    color: #7d6d62;
+    max-width: 720px;
+}
+
+.daily-recipe-card {
+    border: 1px solid #ecdfd5;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 8px 18px rgba(44, 24, 16, 0.08);
+}
+
+.daily-recipe-image-wrap {
+    aspect-ratio: 16 / 10;
+    background: #f1ebe6;
+}
+
+.daily-recipe-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.daily-recipe-content {
+    padding: 0.9rem;
+}
+
+.daily-recipe-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #2f1f16;
+    line-height: 1.25;
+}
+
+.daily-recipe-summary {
+    font-size: 0.82rem;
+    color: #8d837e;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.7em;
+}
+
+.daily-recipe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.75rem;
+}
+
+.daily-recipe-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+    color: #564942;
+    font-weight: 600;
+}
+
+.daily-recipe-meta i {
+    color: #8a6c57;
+}
+
+#dailyRecommendationsCarousel .carousel-control-prev,
+#dailyRecommendationsCarousel .carousel-control-next {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 999px;
+    background: rgba(47, 31, 22, 0.72);
+    top: 42%;
+    transform: translateY(-50%);
+}
+
+#dailyRecommendationsCarousel .carousel-control-prev {
+    left: -0.4rem;
+}
+
+#dailyRecommendationsCarousel .carousel-control-next {
+    right: -0.4rem;
+}
+
+#dailyRecommendationsCarousel .carousel-control-prev-icon,
+#dailyRecommendationsCarousel .carousel-control-next-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.recipe-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+@media (min-width: 992px) {
+    .rd-recommendation-slide {
+        flex-basis: calc((100% - 3rem) / 4);
+    }
+
+    .recipe-results {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .rd-carousel-controls {
+        align-self: flex-start;
+    }
+
+    .daily-recommendations-title {
+        font-size: 1.2rem;
+    }
+
+    #dailyRecommendationsCarousel .carousel-control-prev,
+    #dailyRecommendationsCarousel .carousel-control-next {
+        display: none;
+    }
+
+    .recipe-results {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}
+
+.recipe-card {
+    border: 1px solid #ebdfd7;
+    border-radius: 0.8rem;
+    padding: 0.55rem;
+    background: linear-gradient(180deg, #ffffff 0%, #fffaf6 100%);
+    box-shadow: 0 6px 14px rgba(44, 24, 16, 0.07);
+}
+
+.recipe-card-image-wrap {
+    border-radius: 0.65rem;
+    overflow: hidden;
+    border: 1px solid #e9ddd4;
+    aspect-ratio: 5 / 3;
+    background: #f1ebe6;
+    position: relative;
+}
+
+.recipe-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.recipe-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0 0.2rem;
+}
+
+.recipe-card-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #2f1f16;
+    line-height: 1.2;
+    margin-bottom: 0.4rem !important;
+}
+
+.recipe-card-summary {
+    color: #9b938f;
+    line-height: 1.32;
+    min-height: 2.4em;
+    font-size: 0.82rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding: 0 0.2rem;
+    margin-bottom: 0.55rem !important;
+}
+
+.recipe-card-difficulty {
+    border: 1px solid #f0cfb6;
+    color: #8d4d23;
+    background: #fff2e8;
+    border-radius: 999px;
+    padding: 0.23rem 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.recipe-card-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding: 0.15rem 0.2rem 0;
+    margin-bottom: 0.45rem !important;
+}
+
+.recipe-card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.32rem;
+    color: #4d433e;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+
+.recipe-card-meta-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    object-fit: contain;
+    flex: 0 0 auto;
+}
+
+.recipe-card-actions {
+    padding: 0 0.2rem 0.1rem;
+}
+
+.rd-notebook-card {
+    border-radius: 0.9rem;
+    background: #fffdf9;
+    border: 1px solid #eadfce;
+}
+
+.rd-notebook-body {
+    background:
+        linear-gradient(to right, transparent 0, transparent 2.2rem, #f2d5bf 2.2rem, #f2d5bf 2.28rem, transparent 2.28rem),
+        repeating-linear-gradient(
+            to bottom,
+            #fffdf9 0,
+            #fffdf9 1.85rem,
+            #efe7dc 1.85rem,
+            #efe7dc 1.92rem
+        );
+    padding-left: 3rem !important;
+}
+
+.rd-notebook-title {
+    font-weight: 700;
+    color: #2f1f16;
+}
+
+.rd-notebook-description {
+    max-width: 72ch;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.rd-notebook-heading {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.88rem;
+    color: #8d4d23;
+    margin-bottom: 0.7rem;
+}
+
+.rd-notebook-list li,
+.rd-notebook-steps li {
+    line-height: 1.6;
+}
+

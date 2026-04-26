@@ -4,8 +4,12 @@
 (function () {
     'use strict';
 
+    function fieldSelector(fieldId) {
+        return '#' + fieldId;
+    }
+
     function togglePassword(fieldId) {
-        var field = document.getElementById(fieldId);
+        var field = document.querySelector(fieldSelector(fieldId));
         if (!field) return false;
         field.type = field.type === 'password' ? 'text' : 'password';
         return field.type === 'text';
@@ -21,8 +25,8 @@
 
             function updateToggleIcon(isVisible) {
                 if (!icon || !icon.src) return;
-                var nextIcon = isVisible ? 'vissible.png' : 'hidden.png';
-                icon.src = icon.src.replace(/(hidden|vissible)\.png$/, nextIcon);
+                var nextIcon = isVisible ? 'visible.png' : 'hidden.png';
+                icon.src = icon.src.replace(/(hidden|visible)\.png$/, nextIcon);
             }
 
             el.addEventListener('click', function () {

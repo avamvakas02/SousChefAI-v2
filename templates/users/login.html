@@ -37,6 +37,10 @@
                                     <p>Access your pantry and saved recipes</p>
                                 </div>
 
+                                {% if social_auth_enabled and google_social_auth_enabled %}
+                                    {% include "users/partials/register_social_buttons.html" with social_process="login" social_button_label="Log in with" social_divider_label="or log in with username" %}
+                                {% endif %}
+
                                 <form method="POST" action="{% url 'login' %}">
                                     {% csrf_token %}
                                     {% if next %}

@@ -98,6 +98,11 @@
   box-shadow: 0 0 0 1px rgba(200, 96, 42, 0.26) inset, 0 22px 34px rgba(200, 96, 42, 0.16);
 }
 
+.plan-card-current {
+  border-color: #4A7C59;
+  box-shadow: 0 0 0 1px rgba(74, 124, 89, 0.24) inset, 0 18px 28px rgba(74, 124, 89, 0.14);
+}
+
 .plan-top {
   min-height: 12rem;
 }
@@ -160,6 +165,11 @@
   outline-offset: 2px;
 }
 
+.plan-btn:disabled,
+.plan-btn[disabled] {
+  cursor: not-allowed;
+}
+
 .plan-btn-muted {
   background: #efe5d5;
   border-color: #e5d4ba;
@@ -182,20 +192,27 @@
   margin: 0;
   padding: 0;
   margin-top: auto;
+  display: grid;
+  row-gap: 0.35rem;
 }
 
 .plan-list li {
-  padding-left: 1.2rem;
+  padding-left: 1.3rem;
   position: relative;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0;
   color: var(--sc-text-medium);
   font-size: 0.95rem;
+  min-height: 2.8rem;
+  display: flex;
+  align-items: flex-start;
 }
 
 .plan-list li::before {
   content: "✓";
   position: absolute;
   left: 0;
+  top: 0.06rem;
+  line-height: 1.2;
   color: #4A7C59;
 }
 
@@ -219,6 +236,12 @@
   padding: 0.2rem 0.55rem;
   margin-left: 0.45rem;
   vertical-align: middle;
+}
+
+.tag-current {
+  color: #1f4f2b;
+  background: rgba(74, 124, 89, 0.15);
+  border-color: rgba(74, 124, 89, 0.26);
 }
 
 .plan-savings {

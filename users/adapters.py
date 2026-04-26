@@ -1,9 +1,9 @@
-
-
 from django.core.exceptions import ImproperlyConfigured
 
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialApp
+
+from .models import UserProfile
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -31,3 +31,15 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             )
 
         return apps[0]
+
+    def populate_user(self, request, sociallogin, data):
+        user = super().populate_user(request, sociallogin, data)
+        extra_data = sociallogin.account.extra_data or {}
+        user.first_name = user.first_name or data.get("first_name") or extra_data.get("given_name", "")
+        user.last_name = user.last_name or data.get("last_name") or extra_data.get("family_name", "")
+        return user
+
+    def save_user(self, request, sociallogin, form=None):
+        user = super().save_user(request, sociallogin, form=form)
+        UserProfile.objects.get_or_create(user=user)
+        return user

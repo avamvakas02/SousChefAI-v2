@@ -5,10 +5,13 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_POST
+import importlib.util
 
 from subscriptions.models import CustomerSubscription
 from subscriptions.permissions import require_plan
+from subscriptions.quota import PLAN_VISITOR, effective_plan_for_request
 from subscriptions.quota import merge_anonymous_recipe_usage
 
 from .forms import AccountSettingsForm
@@ -33,6 +36,30 @@ def _social_auth_enabled() -> bool:
     return bool(getattr(settings, "ALLAUTH_ENABLED", False))
 
 
+def _google_social_auth_enabled() -> bool:
+    if not _social_auth_enabled():
+        return False
+
+    if importlib.util.find_spec("allauth.socialaccount.providers.google") is None:
+        return False
+
+    google_settings = getattr(settings, "SOCIALACCOUNT_PROVIDERS", {}).get("google", {})
+    if google_settings.get("APP"):
+        return True
+
+    try:
+        from allauth.socialaccount.models import SocialApp
+    except Exception:
+        return False
+
+    try:
+        site_id = int(getattr(settings, "SITE_ID", 1))
+    except (TypeError, ValueError):
+        site_id = 1
+
+    return SocialApp.objects.filter(provider="google", sites__id=site_id).exists()
+
+
 def _default_auth_backend() -> str:
     backends = getattr(settings, "AUTHENTICATION_BACKENDS", ())
     if isinstance(backends, (list, tuple)) and backends:
@@ -47,8 +74,10 @@ def login_view(request):
         return redirect(nxt or "/")
 
     social_auth_enabled = _social_auth_enabled()
+    google_social_auth_enabled = _google_social_auth_enabled()
     login_ctx = {
         "social_auth_enabled": social_auth_enabled,
+        "google_social_auth_enabled": google_social_auth_enabled,
         "next": _safe_next(request),
     }
 
@@ -78,8 +107,16 @@ def register_view(request):
         return redirect(request.GET.get("next") or "/")
 
     social_auth_enabled = _social_auth_enabled()
+    google_social_auth_enabled = _google_social_auth_enabled()
     if request.method == "GET":
-        return render(request, "users/register.html", {"social_auth_enabled": social_auth_enabled})
+        return render(
+            request,
+            "users/register.html",
+            {
+                "social_auth_enabled": social_auth_enabled,
+                "google_social_auth_enabled": google_social_auth_enabled,
+            },
+        )
 
     username = _safe_post(request, "username")
     first_name = _safe_post(request, "first_name")
@@ -91,19 +128,47 @@ def register_view(request):
 
     if not username:
         messages.error(request, "Please choose an alias (username).")
-        return render(request, "users/register.html", {"social_auth_enabled": social_auth_enabled})
+        return render(
+            request,
+            "users/register.html",
+            {
+                "social_auth_enabled": social_auth_enabled,
+                "google_social_auth_enabled": google_social_auth_enabled,
+            },
+        )
 
     if User.objects.filter(username__iexact=username).exists():
         messages.error(request, "That alias (username) is already taken.")
-        return render(request, "users/register.html", {"social_auth_enabled": social_auth_enabled})
+        return render(
+            request,
+            "users/register.html",
+            {
+                "social_auth_enabled": social_auth_enabled,
+                "google_social_auth_enabled": google_social_auth_enabled,
+            },
+        )
 
     if password1 != password2:
         messages.error(request, "Passwords do not match.")
-        return render(request, "users/register.html", {"social_auth_enabled": social_auth_enabled})
+        return render(
+            request,
+            "users/register.html",
+            {
+                "social_auth_enabled": social_auth_enabled,
+                "google_social_auth_enabled": google_social_auth_enabled,
+            },
+        )
 
     if len(password1) < 8:
         messages.error(request, "Password must be at least 8 characters long.")
-        return render(request, "users/register.html", {"social_auth_enabled": social_auth_enabled})
+        return render(
+            request,
+            "users/register.html",
+            {
+                "social_auth_enabled": social_auth_enabled,
+                "google_social_auth_enabled": google_social_auth_enabled,
+            },
+        )
 
     user = User.objects.create_user(
         username=username,
@@ -129,6 +194,8 @@ def register_view(request):
 @require_http_methods(["GET", "POST"])
 def account_settings(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    customer_sub = CustomerSubscription.objects.filter(user=request.user).first()
+    current_plan = effective_plan_for_request(request)
     edit_mode = request.method == "POST" or request.GET.get("edit") == "1"
 
     if request.method == "POST":
@@ -161,6 +228,29 @@ def account_settings(request):
         "skill_level": profile.get_skill_level_display() or "Not set",
     }
 
+    plan_labels = {
+        PLAN_VISITOR: "Visitor",
+        CustomerSubscription.Plan.REGULAR: "Regular",
+        CustomerSubscription.Plan.PREMIUM: "Premium",
+    }
+    current_plan_label = plan_labels.get(current_plan, "Visitor")
+
+    billing_label = ""
+    if customer_sub and customer_sub.billing_interval:
+        billing_label = (
+            "Monthly"
+            if customer_sub.billing_interval == CustomerSubscription.BillingInterval.MONTH
+            else "Yearly"
+        )
+
+    current_plan_text = current_plan_label
+    if billing_label and current_plan != PLAN_VISITOR:
+        current_plan_text = f"{current_plan_label} ({billing_label})"
+
+    # Route plan changes through our pricing page where checkout is guaranteed.
+    # Stripe Customer Portal may be configured without plan-switch permissions.
+    change_plan_url = reverse("pricing")
+
     return render(
         request,
         "users/account_settings.html",
@@ -168,6 +258,8 @@ def account_settings(request):
             "form": form,
             "edit_mode": edit_mode,
             "account_info": account_info,
+            "current_plan_text": current_plan_text,
+            "change_plan_url": change_plan_url,
         },
     )
 
@@ -193,20 +285,6 @@ def delete_account(request):
 
 @login_required
 @require_plan(CustomerSubscription.Plan.REGULAR)
-def profile_view(request):
-    from recipes.models import FavoriteRecipe
-    favorite_recipes = FavoriteRecipe.objects.filter(user=request.user).order_by('-created_at')
-    
-    return render(
-        request,
-        "users/profile.html",
-        {
-            "favorite_recipes": favorite_recipes,
-        }
-    )
-
-
-@login_required
 def profile_settings_menu(request):
     return render(request, "users/profile_settings_menu.html")
 

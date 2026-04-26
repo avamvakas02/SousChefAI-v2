@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us | SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="about-hero py-5">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="about-kicker">Our Story</span>
+        <h1>We built SousChefAI for real kitchens, not perfect ones.</h1>
+        <p class="about-lead">
+          Cooking should feel creative and comforting, not stressful. SousChefAI helps you use what
+          you already have, discover practical meals quickly, and cook with confidence every day.
+        </p>
+        <div class="d-flex flex-wrap gap-2 about-badges">
+          <span>Ingredient-first approach</span>
+          <span>AI guidance that feels human</span>
+          <span>Built for busy schedules</span>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="about-hero-image-wrap">
+          <img src="{% static 'images/about-imgs/about-img1.png' %}" alt="Fresh ingredients ready for home cooking" class="img-fluid about-hero-image">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-section py-5">
+  <div class="container">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6">
+        <img src="{% static 'images/about-imgs/about-img2.png' %}" alt="Organized pantry and cooking essentials" class="img-fluid about-image">
+      </div>
+      <div class="col-lg-6">
+        <h2>How we started</h2>
+        <p>
+          Most people do not struggle with motivation; they struggle with decision fatigue. You open
+          the fridge, see random ingredients, and still do not know what to cook.
+        </p>
+        <p>
+          We created SousChefAI to reduce that friction. By combining pantry awareness with recipe
+          intelligence, we help you make confident cooking decisions in minutes.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-values py-5">
+  <div class="container">
+    <div class="text-center section-head">
+      <h2>What we believe in</h2>
+      <p>Our product decisions are shaped by everyday cooking habits.</p>
+    </div>
+    <div class="row g-4 mt-1">
+      <div class="col-md-6 col-xl-3">
+        <article class="value-card h-100">
+          <i class="bi bi-lightning-charge"></i>
+          <h3>Speed with substance</h3>
+          <p>Fast suggestions should still be useful, balanced, and easy to follow.</p>
+        </article>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <article class="value-card h-100">
+          <i class="bi bi-heart"></i>
+          <h3>Human-centered AI</h3>
+          <p>Guidance should feel warm, practical, and supportive at each step.</p>
+        </article>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <article class="value-card h-100">
+          <i class="bi bi-recycle"></i>
+          <h3>Less waste</h3>
+          <p>Using existing ingredients first helps homes save money and reduce waste.</p>
+        </article>
+      </div>
+      <div class="col-md-6 col-xl-3">
+        <article class="value-card h-100">
+          <i class="bi bi-stars"></i>
+          <h3>Progress over perfection</h3>
+          <p>Great cooking is built through small wins, not complicated chef techniques.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-section py-5">
+  <div class="container">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6 order-lg-2">
+        <img src="{% static 'images/about-imgs/about-img3.png' %}" alt="Family preparing food together in the kitchen" class="img-fluid about-image">
+      </div>
+      <div class="col-lg-6 order-lg-1">
+        <h2>Who we build for</h2>
+        <p>
+          Students trying to cook on a budget, professionals racing against time, families planning
+          weeknight dinners, and fitness-focused users who want smart nutrition choices.
+        </p>
+        <p>
+          If you have ever said "I do not know what to cook tonight," this platform is for you.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-process py-5">
+  <div class="container">
+    <div class="text-center section-head">
+      <h2>How SousChefAI helps you daily</h2>
+    </div>
+    <div class="row g-4 mt-1">
+      <div class="col-md-4">
+        <div class="process-card">
+          <span>01</span>
+          <h3>Add what you already have</h3>
+          <p>Track pantry ingredients so recommendations start from your real kitchen.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="process-card">
+          <span>02</span>
+          <h3>Discover recipes that fit</h3>
+          <p>Get meal ideas filtered by time, difficulty, and available ingredients.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="process-card">
+          <span>03</span>
+          <h3>Cook with step-by-step support</h3>
+          <p>Follow clear guidance and ask questions as you cook with confidence.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about-cta py-5">
+  <div class="container">
+    <div class="cta-box text-center">
+      <h2>Ready to cook smarter with us?</h2>
+      <p>Set up your pantry, generate tailored recipes, and turn everyday meals into easy wins.</p>
+      <div class="d-flex justify-content-center flex-wrap gap-3">
+        <a href="{% url 'pantry' %}" class="btn btn-primary btn-lg btn-cta">Start with your pantry</a>
+        <a href="{% url 'pricing' %}" class="btn btn-outline-primary btn-lg about-cta-secondary">View plans</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="capstone-section py-5">
+  <div class="container">
+    <div class="capstone-card">
+      <span class="about-kicker">ICT Capstone Project</span>
+      <h2>SousChefAI</h2>
+      <div class="row g-3 capstone-details">
+        <div class="col-md-6">
+          <span>Developer</span>
+          <strong>Aristeidis Panagiotis Vamvakas</strong>
+        </div>
+        <div class="col-md-6">
+          <span>Supervisor</span>
+          <strong>prof. V. Stefanou</strong>
+        </div>
+        <div class="col-md-6">
+          <span>Institution</span>
+          <strong>Deree &ndash; The American College of Greece</strong>
+        </div>
+        <div class="col-md-6">
+          <span>Academic Term</span>
+          <strong>Spring Semester 2026</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

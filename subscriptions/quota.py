@@ -19,6 +19,8 @@ def current_year_month() -> str:
 
 
 def recipe_quota_for_plan(plan: str) -> int | None:
+    # main idea: this is where the monthly generation limits are defined.
+    # none means unlimited, which is used for premium users.
     """Return max recipes per calendar month, or None for unlimited (premium)."""
     if plan == CustomerSubscription.Plan.PREMIUM:
         return None
@@ -28,6 +30,8 @@ def recipe_quota_for_plan(plan: str) -> int | None:
 
 
 def effective_plan(user) -> str:
+    # main idea: a user only gets paid features when the stored subscription is active.
+    # this avoids giving access just because a subscription row exists.
     """
     Paid tier only when subscription row exists and status is active.
     Logged-in users without an active paid plan count as visitor for quotas.
@@ -104,6 +108,8 @@ def usage_remaining(request: HttpRequest) -> int | None:
 
 @transaction.atomic
 def consume_recipe_generation(request: HttpRequest) -> bool:
+    # main idea: this function is called before gemini so quota is checked server side.
+    # select_for_update helps stop two fast requests from spending the same remaining credit.
     """
     Increment usage if under quota (or unlimited). Returns False if quota exhausted.
     """
@@ -160,6 +166,8 @@ def consume_recipe_generation(request: HttpRequest) -> bool:
 
 @transaction.atomic
 def merge_anonymous_recipe_usage(user, pre_login_session_key: str | None) -> None:
+    # main idea: if a visitor generates recipes before login, that usage follows them after login.
+    # this keeps monthly limits fair across anonymous and logged in sessions.
     """
     After login, move this month's anonymous counts onto the user row.
     `pre_login_session_key` must be captured before django.contrib.auth.login(),

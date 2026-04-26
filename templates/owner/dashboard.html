@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Owner Dashboard | SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/owner/owner.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="owner-page py-5">
+    <div class="container">
+        <div class="owner-hero rounded-4 p-4 p-lg-5 mb-4">
+            <p class="owner-kicker mb-2">Staff workspace</p>
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                <div>
+                    <h1 class="mb-2">Owner Dashboard</h1>
+                    <p class="mb-0 text-muted">Monitor users, subscriptions, recipe usage, and support signals.</p>
+                </div>
+                <div class="d-flex align-items-start">
+                    <a class="btn btn-primary" href="{% url 'owner_user_list' %}">
+                        <i class="bi bi-people me-2"></i>Manage users
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-xl-3">
+                <div class="owner-stat rounded-4 p-4">
+                    <span>Total users</span>
+                    <strong>{{ stats.total_users }}</strong>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="owner-stat rounded-4 p-4">
+                    <span>Active subscriptions</span>
+                    <strong>{{ stats.active_subscriptions }}</strong>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="owner-stat rounded-4 p-4">
+                    <span>{{ stats.current_year_month }} generations</span>
+                    <strong>{{ stats.current_usage_total }}</strong>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="owner-stat rounded-4 p-4">
+                    <span>Saved recipes</span>
+                    <strong>{{ stats.saved_recipes }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="owner-panel rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 mb-0">Recent users</h2>
+                        <a class="small" href="{% url 'owner_user_list' %}">View all</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table owner-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app_user in recent_users %}
+                                    <tr>
+                                        <td><a href="{% url 'owner_user_detail' app_user.id %}">{{ app_user.username }}</a></td>
+                                        <td>{{ app_user.email|default:"-" }}</td>
+                                        <td>{{ app_user.date_joined|date:"M j, Y" }}</td>
+                                        <td>
+                                            {% if app_user.is_active %}
+                                                <span class="badge text-bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge text-bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr><td colspan="4" class="text-muted">No users yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="owner-panel rounded-4 p-4 mb-4">
+                    <h2 class="h5 mb-3">Subscription breakdown</h2>
+                    {% for row in subscription_breakdown %}
+                        <div class="owner-row">
+                            <span>{{ row.plan|title }} / {{ row.status|title }}</span>
+                            <strong>{{ row.total }}</strong>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted mb-0">No subscription rows yet.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="owner-panel rounded-4 p-4">
+                    <h2 class="h5 mb-3">Top usage this month</h2>
+                    {% for usage in top_usage_rows %}
+                        <div class="owner-row">
+                            <span>
+                                {% if usage.user %}
+                                    <a href="{% url 'owner_user_detail' usage.user.id %}">{{ usage.user.username }}</a>
+                                {% else %}
+                                    Session {{ usage.session_key|slice:"-6:" }}
+                                {% endif %}
+                            </span>
+                            <strong>{{ usage.count }}</strong>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted mb-0">No usage yet for {{ stats.current_year_month }}.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

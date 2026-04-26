@@ -33,7 +33,7 @@
                                  loading="lazy"
                                  decoding="async">
                         {% elif zone.slug == 'dairy_proteins' %}
-                            <img src="{% static 'images/catalogs/diary & proteins.jpg' %}"
+                            <img src="{% static 'images/catalogs/dairy-proteins.jpg' %}"
                                  alt="Dairy and proteins—eggs, dairy, and fridge ingredients"
                                  class="pantry-zone-hero-placeholder-photo"
                                  width="800"
@@ -66,7 +66,7 @@
                             </a>
                             {% if zone.slug == 'produce' %}
                                 <a href="{% url 'pantry_zone' 'dairy_proteins' %}" class="btn pantry-zone-hero-cta align-self-start">
-                                    Move to Diary &amp; Proteins <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
+                                    Move to Dairy &amp; Proteins <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
                                 </a>
                             {% elif zone.slug == 'dairy_proteins' %}
                                 <a href="{% url 'pantry_zone' 'pantry_staples' %}" class="btn pantry-zone-hero-cta align-self-start">
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        {% include catalog_template %}
+        {% include "pantry/catalogs/catalog_grid.html" %}
         <div class="text-center mt-4">
             <button type="button" class="pantry-show-more-btn" id="pantry-show-more-btn">Show more</button>
         </div>

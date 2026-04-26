@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}SousChefAI/Recipe Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/recipe_discovery.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="recipe-discovery-page py-5">
+    <div class="container">
+        {% if recipe %}
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a href="{% url 'recipe_discovery' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Back To Recipe Discovery
+                </a>
+                {% if can_save_recipe %}
+                    <form method="post" action="{% url 'save_recipe' recipe.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-bookmark-plus me-1"></i> Save The Recipe
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'pricing' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-lock me-1"></i> Upgrade To Save
+                    </a>
+                {% endif %}
+            </div>
+            <article class="card border-0 shadow-sm overflow-hidden rd-notebook-card">
+                <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}" class="img-fluid w-100 rd-detail-image" loading="lazy" referrerpolicy="no-referrer">
+                <div class="card-body p-4 p-lg-5 rd-notebook-body">
+                    <h1 class="h3 mb-3 rd-notebook-title">{{ recipe.title }}</h1>
+                    <p class="text-muted small mb-4 rd-notebook-description">
+                        {{ recipe.description|default:"AI-generated from your pantry ingredients." }}
+                    </p>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <span class="badge text-bg-light">{{ recipe.time_minutes }} min</span>
+                        <span class="badge text-bg-light">{{ recipe.difficulty }}</span>
+                        <span class="badge text-bg-light">{{ recipe.portions }} portions</span>
+                        <span class="badge text-bg-light">Pantry match {{ recipe.pantry_match }}%</span>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <h2 class="h5 rd-notebook-heading">In Your Pantry</h2>
+                            {% if pantry_have %}
+                                <ul class="mb-4 rd-notebook-list">
+                                    {% for item in pantry_have %}
+                                        <li>{{ item|title }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted small mb-4">No matching pantry ingredients detected.</p>
+                            {% endif %}
+
+                            <h2 class="h5 rd-notebook-heading">Missing Ingredients</h2>
+                            {% if pantry_missing %}
+                                <ul id="missing-ingredients-list" class="mb-3 rd-notebook-list">
+                                    {% for item in pantry_missing %}
+                                        <li>{{ item|title }}</li>
+                                    {% endfor %}
+                                </ul>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-primary btn-sm" data-action="print-missing-ingredients">
+                                        <i class="bi bi-printer me-1"></i> Print Missing Ingredients
+                                    </button>
+                                </div>
+                            {% else %}
+                                <p class="text-muted small mb-0">Great news - you already have all required ingredients.</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-lg-8">
+                            <h2 class="h5 rd-notebook-heading">Steps</h2>
+                            <ol class="mb-0 rd-notebook-steps">
+                                {% for step in recipe.steps %}
+                                    <li class="mb-2">{{ step }}</li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% else %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <p class="mb-3">No recipe details available yet.</p>
+                    <a href="{% url 'recipe_discovery' %}" class="btn btn-primary">Go to Recipe Discovery</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/recipe_discovery.js' %}"></script>
+{% endblock %}

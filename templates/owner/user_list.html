@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Owner Users | SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/owner/owner.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="owner-page py-5">
+    <div class="container">
+        <div class="owner-hero rounded-4 p-4 p-lg-5 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                <div>
+                    <p class="owner-kicker mb-2">Owner area</p>
+                    <h1 class="mb-2">Users</h1>
+                    <p class="mb-0 text-muted">Search accounts and open support details.</p>
+                </div>
+                <div class="d-flex align-items-start">
+                    <a class="btn btn-outline-primary" href="{% url 'owner_dashboard' %}">Back to dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="owner-panel rounded-4 p-4">
+            <form method="get" class="row g-2 mb-4">
+                <div class="col-md-9">
+                    <label class="visually-hidden" for="owner-user-search">Search users</label>
+                    <input id="owner-user-search" class="form-control" type="search" name="q" value="{{ query }}" placeholder="Search username, email, or name">
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table owner-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Plan</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app_user in page_obj %}
+                            <tr>
+                                <td>
+                                    <strong>{{ app_user.username }}</strong>
+                                    {% if app_user.is_staff %}
+                                        <span class="badge text-bg-primary ms-1">Owner</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ app_user.email|default:"-" }}</td>
+                                <td>
+                                    {% if app_user.customer_subscription %}
+                                        {{ app_user.customer_subscription.get_plan_display }} / {{ app_user.customer_subscription.get_status_display }}
+                                    {% else %}
+                                        Visitor
+                                    {% endif %}
+                                </td>
+                                <td>{{ app_user.date_joined|date:"M j, Y" }}</td>
+                                <td>
+                                    {% if app_user.is_active %}
+                                        <span class="badge text-bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge text-bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-primary" href="{% url 'owner_user_detail' app_user.id %}">Open</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-muted">No users matched your search.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if page_obj.has_other_pages %}
+                <nav aria-label="Owner user pagination">
+                    <ul class="pagination mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Next</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

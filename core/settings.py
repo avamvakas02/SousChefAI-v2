@@ -17,11 +17,12 @@ except ModuleNotFoundError:  # pragma: no cover
     def load_dotenv(*args, **kwargs):
         return False
 
-load_dotenv()
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env.local")
 
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +39,13 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 def _env_list(name: str, default: str = "") -> list[str]:
     raw = os.getenv(name, default)
     return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
 
 
 def _oauth_env_value(base_name: str) -> str:
@@ -66,6 +74,11 @@ _trust_proxy_tls = os.getenv("TRUST_PROXY_TLS", "").strip().lower() in (
 if _trust_proxy_tls or os.getenv("RAILWAY_ENVIRONMENT"):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     USE_X_FORWARDED_HOST = True
+
+SECURE_SSL_REDIRECT = _env_bool("SECURE_SSL_REDIRECT", not DEBUG)
+SESSION_COOKIE_SECURE = _env_bool("SESSION_COOKIE_SECURE", not DEBUG)
+CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", not DEBUG)
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "60" if not DEBUG else "0"))
 
 
 # Application definition
@@ -104,10 +117,10 @@ _OPTIONAL_ALLAUTH_APPS = [
 _LOCAL_APPS = [
     "users",
     "pantry",
-    "recipes",
-    "ai_assistant",
     "pages",
-    "subscriptions"
+    "recipe_discovery",
+    "subscriptions",
+    "owner",
 ]
 
 INSTALLED_APPS = (
@@ -188,6 +201,10 @@ if ALLAUTH_ENABLED:
     SOCIALACCOUNT_ADAPTER = "users.adapters.SocialAccountAdapter"
     # Merge anonymous recipe quota after login (OAuth and allauth account flows).
     ACCOUNT_ADAPTER = "users.account_adapter.AccountAdapter"
+    # Let verified Google accounts create/link local accounts without the extra allauth signup form.
+    SOCIALACCOUNT_AUTO_SIGNUP = True
+    SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+    SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
     # Skip allauth's intermediate "Sign In Via … / Continue" page; start OAuth immediately (uses site's base styling on your pages only).
     SOCIALACCOUNT_LOGIN_ON_GET = True
 
@@ -309,15 +326,17 @@ MEDIA_ROOT = BASE_DIR / "media"
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Gemini AI
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-
 
 def _env_clean(name: str) -> str:
     """
     Reads env vars and trims accidental wrapping quotes.
     """
     return os.getenv(name, "").strip().strip('"').strip("'")
+
+
+# Recipe image providers
+PEXELS_API_KEY = _env_clean("PEXELS_API_KEY")
+UNSPLASH_ACCESS_KEY = _env_clean("UNSPLASH_ACCESS_KEY")
 
 
 # Stripe billing (Phase D)
@@ -346,4 +365,10 @@ PANTRY_INGREDIENT_LIST_URL = os.getenv(
 PANTRY_MAX_INGREDIENTS_PER_ZONE = int(os.getenv("PANTRY_MAX_INGREDIENTS_PER_ZONE", "0"))
 # Thumbnails: TheMealDB CDN (same project as ingredient list); see ingredient_service.themealdb_ingredient_image_url
 PANTRY_SHOW_INGREDIENT_IMAGES = os.getenv("PANTRY_SHOW_INGREDIENT_IMAGES", "True") == "True"
+
+# Gemini recipe discovery
+GEMINI_API_KEY = _env_clean("GEMINI_API_KEY")
+GEMINI_RECIPE_MODEL = _env_clean("GEMINI_RECIPE_MODEL") or "gemini-1.5-flash"
+GEMINI_IMAGE_MODEL = _env_clean("GEMINI_IMAGE_MODEL") or "gemini-2.0-flash-preview-image-generation"
+RECIPE_IMAGE_PROVIDER = _env_clean("RECIPE_IMAGE_PROVIDER") or "gemini"
 

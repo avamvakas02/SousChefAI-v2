@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Privacy Policy | SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/privacy.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="privacy-hero py-5">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <span class="privacy-kicker">Privacy Policy</span>
+        <h1>Your kitchen data should stay clear, protected, and useful.</h1>
+        <p class="privacy-lead">
+          This Privacy Policy explains what information SousChefAI collects, how we use it,
+          and the choices you have when using our pantry, recipe, account, and subscription features.
+        </p>
+        <p class="privacy-updated">Last updated: April 25, 2026</p>
+      </div>
+      <div class="col-lg-5">
+        <aside class="privacy-summary-card">
+          <div class="privacy-card-icon">
+            <i class="bi bi-shield-lock"></i>
+          </div>
+          <h2>Privacy at a glance</h2>
+          <ul>
+            <li>We use your data to run SousChefAI and personalize recipe recommendations.</li>
+            <li>Payment details are handled by secure payment providers, not stored by us.</li>
+            <li>You can contact us about access, correction, deletion, or privacy questions.</li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="privacy-content py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <aside class="privacy-toc">
+          <h2>On this page</h2>
+          <a href="#information">Information we collect</a>
+          <a href="#use">How we use information</a>
+          <a href="#sharing">How information is shared</a>
+          <a href="#choices">Your choices</a>
+          <a href="#security">Security and retention</a>
+          <a href="#contact">Contact us</a>
+        </aside>
+      </div>
+
+      <div class="col-lg-8">
+        <article class="privacy-policy-card">
+          <section id="information" class="policy-section">
+            <h2>1. Information we collect</h2>
+            <p>
+              We collect information you provide directly, such as your name, email address,
+              account credentials, pantry ingredients, recipe preferences, saved recipes, and
+              messages you send through support or contact channels.
+            </p>
+            <p>
+              We may also collect usage information, including pages visited, feature activity,
+              device/browser details, and approximate technical information needed to keep the
+              website secure and reliable.
+            </p>
+          </section>
+
+          <section id="use" class="policy-section">
+            <h2>2. How we use your information</h2>
+            <p>We use information to provide, maintain, and improve SousChefAI, including to:</p>
+            <ul>
+              <li>Create and manage your account.</li>
+              <li>Generate recipe ideas based on pantry items, preferences, and selected filters.</li>
+              <li>Save recipes, pantry data, and account settings.</li>
+              <li>Process subscriptions, enforce plan limits, and provide billing support.</li>
+              <li>Respond to support requests, troubleshoot issues, and protect against abuse.</li>
+            </ul>
+          </section>
+
+          <section class="policy-section">
+            <h2>3. AI-generated content</h2>
+            <p>
+              SousChefAI may process ingredients, preferences, recipe prompts, and related cooking
+              context to generate recommendations. Avoid entering sensitive personal information into
+              recipe prompts or free-text fields unless it is necessary for your request.
+            </p>
+          </section>
+
+          <section id="sharing" class="policy-section">
+            <h2>4. How information is shared</h2>
+            <p>
+              We do not sell your personal information. We may share limited information with trusted
+              service providers that help us operate the website, such as hosting, analytics, email,
+              payment processing, authentication, and AI infrastructure providers.
+            </p>
+            <p>
+              We may also disclose information when required by law, to protect the rights and safety
+              of users, or to investigate fraud, abuse, or security issues.
+            </p>
+          </section>
+
+          <section class="policy-section">
+            <h2>5. Payments and subscriptions</h2>
+            <p>
+              Subscription payments are processed through third-party payment providers. SousChefAI
+              does not store full card numbers. We may receive payment status, plan, billing interval,
+              and customer identifiers needed to activate and manage subscriptions.
+            </p>
+          </section>
+
+          <section id="choices" class="policy-section">
+            <h2>6. Your choices</h2>
+            <p>
+              You can update account information through your account settings where available. You
+              may also contact us to request access, correction, deletion, or other privacy-related
+              assistance. Some information may need to be retained for legal, billing, security, or
+              operational reasons.
+            </p>
+          </section>
+
+          <section id="security" class="policy-section">
+            <h2>7. Security and retention</h2>
+            <p>
+              We use reasonable safeguards designed to protect information from unauthorized access,
+              loss, misuse, or alteration. No online service can guarantee absolute security, so we
+              encourage you to use a strong password and keep your login details private.
+            </p>
+            <p>
+              We retain information for as long as needed to provide SousChefAI, comply with legal
+              obligations, resolve disputes, enforce agreements, and maintain reliable service.
+            </p>
+          </section>
+
+          <section class="policy-section">
+            <h2>8. Children's privacy</h2>
+            <p>
+              SousChefAI is not intended for children under 13. If we learn that a child has provided
+              personal information without appropriate consent, we will take reasonable steps to delete it.
+            </p>
+          </section>
+
+          <section class="policy-section">
+            <h2>9. Changes to this policy</h2>
+            <p>
+              We may update this Privacy Policy from time to time. When we make changes, we will update
+              the date above and, when appropriate, provide additional notice in the product.
+            </p>
+          </section>
+
+          <section id="contact" class="policy-section policy-contact">
+            <h2>10. Contact us</h2>
+            <p>
+              For privacy questions or requests, email us at
+              <a href="mailto:privacy@souschefai.com">privacy@souschefai.com</a>.
+            </p>
+          </section>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

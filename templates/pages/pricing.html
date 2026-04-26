@@ -12,7 +12,6 @@
   <header class="pricing-hero">
     <p class="pricing-kicker mb-2">Simple plans, real kitchen value</p>
     <h1 class="mb-2">Choose your SousChefAI plan</h1>
-    <p class="pricing-lead mb-0">Start in seconds with secure Stripe checkout. Cancel anytime, no hidden fees, instant access after payment.</p>
   </header>
 
   <div class="trust-pills" role="list" aria-label="Payment and billing reassurances">
@@ -23,15 +22,19 @@
 
   <div class="pricing-wrap">
     <div class="pricing-grid">
-      <article class="plan-card plan-card-visitor">
+      <article class="plan-card plan-card-visitor{% if is_current_visitor %} plan-card-current{% endif %}">
         <div class="plan-top">
-          <div class="plan-name">Visitor</div>
+          <div class="plan-name">Visitor{% if is_current_visitor %} <span class="tag tag-current">Current Plan</span>{% endif %}</div>
           <div class="plan-sub">Best for trying SousChefAI before upgrading</div>
           <div class="plan-price">€0 <small>/ month</small></div>
         </div>
         <div class="plan-cta">
           {% if user.is_authenticated %}
-            <a class="btn btn-light plan-btn js-plan-cta" href="/pantry/" data-plan-name="visitor" data-plan-tier="free" data-plan-billing="monthly">Continue Free</a>
+            {% if is_current_visitor %}
+              <button type="button" class="btn btn-light plan-btn plan-btn-muted" disabled>Current plan</button>
+            {% else %}
+              <a class="btn btn-light plan-btn js-plan-cta" href="/pantry/" data-plan-name="visitor" data-plan-tier="free" data-plan-billing="monthly">Continue Free</a>
+            {% endif %}
           {% else %}
             <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="visitor" data-plan-tier="free" data-plan-billing="monthly">Try for Free</a>
           {% endif %}
@@ -40,23 +43,28 @@
           <li>2 AI recipe generations each month</li>
           <li>Build and organize your pantry</li>
           <li>Discover recipes for everyday cooking</li>
+          <li class="exclude">Save recipes as PDF</li>
           <li class="exclude">Unlimited recipe generations</li>
         </ul>
       </article>
 
-      <article class="plan-card">
+      <article class="plan-card{% if is_current_regular %} plan-card-current{% endif %}">
         <div class="plan-top">
-          <div class="plan-name">Regular</div>
+          <div class="plan-name">Regular{% if is_current_regular %} <span class="tag tag-current">Current Plan</span>{% endif %}</div>
           <div class="plan-sub">Best for weekly meal planning and consistency</div>
           <div class="plan-price">€1.99 <small>/ month</small></div>
         </div>
         <div class="plan-cta">
           {% if user.is_authenticated %}
-            <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">
-              {% csrf_token %}
-              <input type="hidden" name="price_id" value="{{ stripe_price_regular_monthly }}">
-              <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">Start Regular</button>
-            </form>
+            {% if is_current_regular %}
+              <button type="button" class="btn btn-light plan-btn plan-btn-muted" disabled>Current plan</button>
+            {% else %}
+              <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">
+                {% csrf_token %}
+                <input type="hidden" name="price_id" value="{{ stripe_price_regular_monthly }}">
+                <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">Choose Regular</button>
+              </form>
+            {% endif %}
           {% else %}
             <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="regular" data-plan-tier="paid" data-plan-billing="monthly">Start Regular</a>
           {% endif %}
@@ -65,23 +73,28 @@
           <li>10 AI recipe generations monthly</li>
           <li>Everything in Visitor</li>
           <li>Plan meals with less decision fatigue</li>
+          <li class="exclude">Save recipes as PDF</li>
           <li class="exclude">Unlimited recipe generations</li>
         </ul>
       </article>
 
-      <article class="plan-card featured">
+      <article class="plan-card featured{% if is_current_premium_monthly %} plan-card-current{% endif %}">
         <div class="plan-top">
-          <div class="plan-name">Premium <span class="tag">Most Popular</span></div>
+          <div class="plan-name">Premium <span class="tag">Most Popular</span>{% if is_current_premium_monthly %} <span class="tag tag-current">Current Plan</span>{% endif %}</div>
           <div class="plan-sub">Best for daily cooking with unlimited AI help</div>
           <div class="plan-price">€4.99 <small>/ month</small></div>
         </div>
         <div class="plan-cta">
           {% if user.is_authenticated %}
-            <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">
-              {% csrf_token %}
-              <input type="hidden" name="price_id" value="{{ stripe_price_premium_monthly }}">
-              <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">Start Premium</button>
-            </form>
+            {% if is_current_premium_monthly %}
+              <button type="button" class="btn btn-light plan-btn plan-btn-muted" disabled>Current plan</button>
+            {% else %}
+              <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">
+                {% csrf_token %}
+                <input type="hidden" name="price_id" value="{{ stripe_price_premium_monthly }}">
+                <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">Choose Premium</button>
+              </form>
+            {% endif %}
           {% else %}
             <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="premium" data-plan-tier="paid" data-plan-billing="monthly">Start Premium</a>
           {% endif %}
@@ -89,25 +102,30 @@
         <ul class="plan-list">
           <li>Unlimited AI recipe generations</li>
           <li>Everything in Regular</li>
+          <li>Save recipes as PDF</li>
           <li>Fast daily support for smarter cooking</li>
           <li class="exclude">Lower yearly price per month</li>
         </ul>
       </article>
 
-      <article class="plan-card">
+      <article class="plan-card{% if is_current_premium_yearly %} plan-card-current{% endif %}">
         <div class="plan-top">
-          <div class="plan-name">Chef's Year Pass <span class="tag">Best Value</span></div>
+          <div class="plan-name">Chef's Year Pass <span class="tag">Best Value</span>{% if is_current_premium_yearly %} <span class="tag tag-current">Current Plan</span>{% endif %}</div>
           <div class="plan-sub">Best for long-term savings with full Premium access</div>
           <div class="plan-price">€34.99 <small>/ year</small></div>
           <div class="plan-savings">Save 41% vs Premium monthly</div>
         </div>
         <div class="plan-cta">
           {% if user.is_authenticated %}
-            <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">
-              {% csrf_token %}
-              <input type="hidden" name="price_id" value="{{ stripe_price_premium_yearly }}">
-              <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">Start Year Pass</button>
-            </form>
+            {% if is_current_premium_yearly %}
+              <button type="button" class="btn btn-light plan-btn plan-btn-muted" disabled>Current plan</button>
+            {% else %}
+              <form method="post" action="{% url 'subscriptions_checkout' %}" class="js-checkout-form" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">
+                {% csrf_token %}
+                <input type="hidden" name="price_id" value="{{ stripe_price_premium_yearly }}">
+                <button type="submit" class="btn btn-light plan-btn js-plan-cta" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">Choose Year Pass</button>
+              </form>
+            {% endif %}
           {% else %}
             <a class="btn btn-light plan-btn js-plan-cta" href="/users/login/?next=/pricing/" data-plan-name="year-pass" data-plan-tier="paid" data-plan-billing="yearly">Start Year Pass</a>
           {% endif %}
@@ -115,6 +133,7 @@
         <ul class="plan-list">
           <li>Unlimited AI recipe generations</li>
           <li>Everything in Premium</li>
+          <li>Save recipes as PDF</li>
           <li>Pay once and save all year</li>
         </ul>
       </article>

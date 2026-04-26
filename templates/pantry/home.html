@@ -81,7 +81,7 @@
                             {% elif z.slug == 'dairy_proteins' %}
                                 <div class="pantry-cat-card-cover" aria-hidden="true">
                                     <img
-                                        src="{% static 'images/diary & proteins.jpg' %}"
+                                        src="{% static 'images/dairy-proteins.jpg' %}"
                                         alt=""
                                         class="pantry-cat-card-cover-img"
                                         loading="lazy"
@@ -106,7 +106,17 @@
                             </div>
                             <div class="pantry-cat-card-body">
                                 <h3 class="pantry-cat-card-title">{{ z.title }}</h3>
-                                <p class="pantry-cat-card-sub">{{ z.subtitle }}</p>
+                                <p class="pantry-cat-card-sub">
+                                    {% if z.slug == 'produce' %}
+                                        Fresh fruits, vegetables, and herbs for everyday cooking.
+                                    {% elif z.slug == 'dairy_proteins' %}
+                                        Dairy essentials, eggs, and proteins to power every meal.
+                                    {% elif z.slug == 'pantry_staples' %}
+                                        Oils, grains, spices, and shelf-stable essentials.
+                                    {% else %}
+                                        {{ z.subtitle }}
+                                    {% endif %}
+                                </p>
                                 <span class="pantry-cat-card-cta">Open Catalog <i class="bi bi-arrow-right-short ms-1" aria-hidden="true"></i></span>
                             </div>
                         </a>
@@ -121,7 +131,7 @@
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                         <div>
                             <h2 id="pantry-quick-add-heading" class="pantry-section-title mb-1">Quick Add Ingredients</h2>
-                            <p class="pantry-section-desc mb-0">Search and instantly filter ingredients like the catalog view, then add right here.</p>
+
                         </div>
                     </div>
                     <div id="pantry-home-catalog-controls"
@@ -137,9 +147,11 @@
                                    autocomplete="off">
                         </div>
                     </div>
-                    <p id="pantry-home-search-hint" class="text-muted small mb-3">Start typing to see matching ingredients and their types.</p>
+
                     <p id="pantry-home-search-empty" class="text-muted small mb-0 d-none">No ingredient matches your search.</p>
 
+                    {# main idea: these groups come from _quick_add_groups in the view. #}
+                    {# each item becomes a card that can post quick_add or quick_remove. #}
                     {% for group in quick_add_groups %}
                         <div class="pantry-catalog-group mt-4 d-none" data-home-catalog-group>
                             <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
@@ -162,7 +174,7 @@
                                                          loading="lazy"
                                                          decoding="async"
                                                          referrerpolicy="no-referrer"
-                                                         onerror="this.classList.add('d-none'); var fb=this.parentElement && this.parentElement.querySelector('.pantry-ingtile-icon--fallback'); if (fb) { fb.classList.remove('d-none'); }">
+                                                         data-image-error-action="show-fallback-icon">
                                                     <span class="pantry-ingtile-icon pantry-ingtile-icon--fallback d-none" aria-hidden="true"><i class="bi {{ opt.icon }}"></i></span>
                                                 {% else %}
                                                     <span class="pantry-ingtile-icon" aria-hidden="true"><i class="bi {{ opt.icon }}"></i></span>
@@ -200,6 +212,8 @@
             </div>
         </section>
 
+        {# main idea: this section renders the pantry items saved in the database. #}
+        {# the view passes items, and this table loops through them below. #}
         <section class="pantry-section" aria-labelledby="pantry-inventory-heading">
             <div class="pantry-inventory-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
                 <div>
@@ -214,7 +228,7 @@
                     <div class="pantry-inventory-controls d-flex flex-wrap align-items-end justify-content-between gap-3">
                         <form method="get" action="{% url 'pantry' %}" class="pantry-filter-form">
                             <label for="pantry-category-filter" class="pantry-control-label">Category</label>
-                            <select id="pantry-category-filter" name="category" class="form-select form-select-sm pantry-filter-select" onchange="this.form.submit()">
+                            <select id="pantry-category-filter" name="category" class="form-select form-select-sm pantry-filter-select" data-submit-on-change>
                                 <option value="" {% if not category_filter %}selected{% endif %}>All categories</option>
                                 {% for value, label, count in category_rows %}
                                     <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>
@@ -234,7 +248,6 @@
                             <button type="submit" class="btn btn-sm pantry-fold-cta-button px-3">Remove selected</button>
                         </form>
                     </div>
-                    <p class="pantry-control-hint mb-0 mt-2">Use category filter to narrow your inventory. Select rows to remove many at once.</p>
                 </div>
 
                 {% if not items %}
@@ -264,6 +277,8 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {# this loop is where saved pantry ingredients become table rows. #}
+                                {# item fields like name, quantity, and category come from pantryitem. #}
                                 {% for item in items %}
                                     <tr data-pantry-item-id="{{ item.pk }}">
                                         <td class="text-center pantry-table-check-col">
@@ -309,15 +324,17 @@
                 {% endif %}
             </div>
 
-            <div class="pantry-generate-action d-flex justify-content-center mt-5 mb-2">
-                <a href="{% url 'recipe_discovery_page' %}?auto_generate=true" class="btn recipe-magic-btn">
-                    <i class="bi bi-stars me-2"></i> Generate Recipes
+            <div class="pantry-recipe-cta text-center mt-4">
+                <a href="{% url 'recipe_discovery' %}" class="btn recipe-magic-btn">
+                    <i class="bi bi-stars me-2" aria-hidden="true"></i>
+                    Generate Recipes
                 </a>
             </div>
 
         </section>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}

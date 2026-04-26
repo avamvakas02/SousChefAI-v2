@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Owner User Detail | SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/owner/owner.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="owner-page py-5">
+    <div class="container">
+        <div class="owner-hero rounded-4 p-4 p-lg-5 mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                <div>
+                    <p class="owner-kicker mb-2">User support</p>
+                    <h1 class="mb-2">{{ target_user.username }}</h1>
+                    <p class="mb-0 text-muted">{{ target_user.email|default:"No email set" }}</p>
+                </div>
+                <div class="d-flex gap-2 align-items-start">
+                    <a class="btn btn-outline-primary" href="{% url 'owner_user_list' %}">All users</a>
+                    <a class="btn btn-primary" href="{% url 'owner_dashboard' %}">Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <div class="owner-panel rounded-4 p-4 h-100">
+                    <h2 class="h5 mb-3">Account</h2>
+                    <dl class="owner-details mb-4">
+                        <dt>Name</dt>
+                        <dd>{{ target_user.get_full_name|default:"Not set" }}</dd>
+                        <dt>Joined</dt>
+                        <dd>{{ target_user.date_joined|date:"M j, Y H:i" }}</dd>
+                        <dt>Last login</dt>
+                        <dd>{{ target_user.last_login|date:"M j, Y H:i"|default:"Never" }}</dd>
+                        <dt>Skill level</dt>
+                        <dd>{{ profile.get_skill_level_display }}</dd>
+                        <dt>Status</dt>
+                        <dd>
+                            {% if target_user.is_active %}
+                                <span class="badge text-bg-success">Active</span>
+                            {% else %}
+                                <span class="badge text-bg-secondary">Inactive</span>
+                            {% endif %}
+                            {% if target_user.is_staff %}
+                                <span class="badge text-bg-primary">Owner</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+
+                    <form method="post" action="{% url 'owner_set_user_active' target_user.id %}" class="mb-2">
+                        {% csrf_token %}
+                        {% if target_user.is_active %}
+                            <input type="hidden" name="is_active" value="0">
+                            <button class="btn btn-outline-danger w-100" type="submit">Deactivate account</button>
+                        {% else %}
+                            <input type="hidden" name="is_active" value="1">
+                            <button class="btn btn-outline-success w-100" type="submit">Reactivate account</button>
+                        {% endif %}
+                    </form>
+
+                    {% if request.user.is_superuser and target_user != request.user %}
+                        <form method="post" action="{% url 'owner_set_owner_access' target_user.id %}">
+                            {% csrf_token %}
+                            {% if target_user.is_staff %}
+                                <input type="hidden" name="is_staff" value="0">
+                                <button class="btn btn-outline-secondary w-100" type="submit">Remove owner access</button>
+                            {% else %}
+                                <input type="hidden" name="is_staff" value="1">
+                                <button class="btn btn-outline-primary w-100" type="submit">Grant owner access</button>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="owner-panel rounded-4 p-4 h-100">
+                    <h2 class="h5 mb-3">Subscription</h2>
+                    <form method="post" action="{% url 'owner_update_subscription' target_user.id %}" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="form-label" for="owner-plan">Plan</label>
+                            <select id="owner-plan" class="form-select" name="plan">
+                                {% for value, label in plan_choices %}
+                                    <option value="{{ value }}" {% if subscription and subscription.plan == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="owner-status">Status</label>
+                            <select id="owner-status" class="form-select" name="status">
+                                {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if subscription and subscription.status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="owner-billing">Billing interval</label>
+                            <select id="owner-billing" class="form-select" name="billing_interval">
+                                <option value="">Not set</option>
+                                {% for value, label in billing_interval_choices %}
+                                    <option value="{{ value }}" {% if subscription and subscription.billing_interval == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <div class="owner-note rounded-3 p-3 mb-3">
+                                {% if subscription %}
+                                    Stripe customer: {{ subscription.stripe_customer_id|default:"-" }}<br>
+                                    Stripe subscription: {{ subscription.stripe_subscription_id|default:"-" }}<br>
+                                    Current period end: {{ subscription.current_period_end|date:"M j, Y H:i"|default:"-" }}
+                                {% else %}
+                                    No subscription row exists yet. Saving here will create one.
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-primary" type="submit">Save subscription</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="owner-panel rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1">Usage</h2>
+                            <p class="text-muted small mb-0">{{ current_year_month }} count: {{ current_usage.count|default:0 }}</p>
+                        </div>
+                        <form method="post" action="{% url 'owner_reset_current_usage' target_user.id %}">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger" type="submit">Reset</button>
+                        </form>
+                    </div>
+                    {% for usage in usage_rows %}
+                        <div class="owner-row">
+                            <span>{{ usage.year_month }}</span>
+                            <strong>{{ usage.count }}</strong>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted mb-0">No usage rows for this user.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="owner-panel rounded-4 p-4 h-100">
+                    <h2 class="h5 mb-3">Pantry items</h2>
+                    {% for item in pantry_items %}
+                        <div class="owner-list-item">
+                            <strong>{{ item.name }}</strong>
+                            <span>{{ item.get_category_display }}{% if item.quantity %} · {{ item.quantity }}{% endif %}</span>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted mb-0">No pantry items.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="owner-panel rounded-4 p-4 h-100">
+                    <h2 class="h5 mb-3">Saved recipes</h2>
+                    {% for recipe in saved_recipes %}
+                        <div class="owner-list-item">
+                            <strong>{{ recipe.title }}</strong>
+                            <span>{{ recipe.difficulty }} · {{ recipe.time_minutes }} min</span>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted mb-0">No saved recipes.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

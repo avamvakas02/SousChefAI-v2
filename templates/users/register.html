@@ -37,8 +37,8 @@
                                     <p>Join SousChef AI and personalize your cooking experience</p>
                                 </div>
 
-                                {% if social_auth_enabled %}
-                                    {% include "users/partials/register_social_buttons.html" %}
+                                {% if social_auth_enabled and google_social_auth_enabled %}
+                                    {% include "users/partials/register_social_buttons.html" with social_process="signup" social_button_label="Sign up with" social_divider_label="or sign up with email" %}
                                 {% endif %}
 
                                 <form method="POST" action="{% url 'register' %}">

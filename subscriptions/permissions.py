@@ -16,6 +16,15 @@ _PLAN_RANK = {
 }
 
 
+def plan_label(plan: str) -> str:
+    labels = {
+        PLAN_VISITOR: "Visitor",
+        CustomerSubscription.Plan.REGULAR: "Regular",
+        CustomerSubscription.Plan.PREMIUM: "Premium",
+    }
+    return labels.get(plan, "Visitor")
+
+
 def has_required_plan(user, required_plan: str) -> bool:
     if getattr(user, "is_superuser", False):
         return True
@@ -24,6 +33,8 @@ def has_required_plan(user, required_plan: str) -> bool:
 
 
 def require_plan(required_plan: str, *, api: bool = False):
+    # main idea: this decorator protects premium or regular-only views.
+    # normal pages redirect to pricing, while api calls can receive json.
     """
     Enforce subscription tier checks for feature-gated views.
     `api=True` returns JSON 403 responses instead of HTML redirects.
@@ -36,7 +47,8 @@ def require_plan(required_plan: str, *, api: bool = False):
             if has_required_plan(request.user, required_plan):
                 return view_func(request, *args, **kwargs)
 
-            message = "This feature requires a Regular or Premium plan. Upgrade to continue."
+            required_label = plan_label(required_plan)
+            message = f"This feature requires a {required_label} plan. Upgrade to continue."
             if api:
                 return JsonResponse(
                     {

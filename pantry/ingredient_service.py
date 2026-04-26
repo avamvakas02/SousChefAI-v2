@@ -450,6 +450,8 @@ _TYPE_TO_ZONE_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 
 def _assign_zone(name: str, ingredient_type: str = "") -> str:
+    # main idea: this decides which catalog section an ingredient belongs to.
+    # priority rules run first so mixed names are put in the most useful section for the user.
     n = name.lower()
     t = (ingredient_type or "").strip().lower()
     for zone_slug, keywords in _PRIORITY_ZONE_RULES:
@@ -672,6 +674,8 @@ def _format_name_with_type(name: str, ingredient_type: str = "") -> str:
 
 
 def _build_from_api(meals: list[dict[str, Any]] | None) -> dict[str, Any]:
+    # main idea: this converts themealdb ingredients into the structure used by the ui.
+    # it creates zone lists for rendering and a lookup table for saving ingredients by key.
     buckets: dict[str, list[tuple[str, str, str]]] = {
         "produce": [],
         "dairy_proteins": [],
@@ -728,6 +732,8 @@ def _build_static() -> dict[str, Any]:
 
 
 def get_catalog() -> dict[str, Any]:
+    # main idea: this is the pantry catalog entry point.
+    # it tries cached api data first, then falls back to local presets if the api is unavailable.
     """Return {zones, lookup, source}. Cached 24h."""
     cached = cache.get(CACHE_KEY)
     if cached is not None:
@@ -750,6 +756,8 @@ def get_zones() -> list[dict[str, Any]]:
 
 
 def get_zone_by_slug(slug: str) -> dict[str, Any] | None:
+    # used by the url, for example /pantry/produce/.
+    # it finds the matching catalog zone that the template will render.
     for z in get_zones():
         if z["slug"] == slug:
             return z
@@ -757,6 +765,8 @@ def get_zone_by_slug(slug: str) -> dict[str, Any] | None:
 
 
 def lookup_preset(preset_key: str) -> tuple[str, str] | None:
+    # this connects a hidden form value back to a real pantry category and name.
+    # without this lookup, the add button would only send a key and not a usable ingredient.
     """
     Resolve preset_key to (PantryItem.Category value, display name).
     """

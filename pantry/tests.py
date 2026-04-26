@@ -11,7 +11,7 @@ from .ingredient_service import (
     themealdb_ingredient_image_url,
     themealdb_ingredient_slug,
 )
-from .views import _presets_for_zone
+from .catalog_service import _presets_for_zone
 from .models import PantryItem
 from .presets import QUICK_ZONES, get_icon, get_preset, get_zone_by_slug
 
@@ -97,11 +97,11 @@ class PantryZonePresetsTests(TestCase):
         )
         zone = {"slug": "produce", "keys": ["k1", "k2"]}
 
-        with patch("pantry.views.lookup_preset") as mock_lookup, patch(
-            "pantry.views.resolve_icon",
+        with patch("pantry.catalog_service.lookup_preset") as mock_lookup, patch(
+            "pantry.catalog_service.resolve_icon",
             return_value="bi-basket2",
         ), patch(
-            "pantry.views.ingredient_image_url",
+            "pantry.catalog_service.ingredient_image_url",
             return_value="https://example.com/img.png",
         ):
             # Both keys resolve to the same display name.
@@ -123,11 +123,11 @@ class PantryZonePresetsTests(TestCase):
         )
         zone = {"slug": "produce", "keys": ["k1", "k2"]}
 
-        with patch("pantry.views.lookup_preset") as mock_lookup, patch(
-            "pantry.views.resolve_icon",
+        with patch("pantry.catalog_service.lookup_preset") as mock_lookup, patch(
+            "pantry.catalog_service.resolve_icon",
             return_value="bi-basket2",
         ), patch(
-            "pantry.views.ingredient_image_url",
+            "pantry.catalog_service.ingredient_image_url",
             side_effect=["https://example.com/same.png", "https://example.com/same.png"],
         ):
             # Names differ, but the image URL resolves to the same thumbnail.

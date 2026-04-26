@@ -1,0 +1,77 @@
+{% load static %}
+<footer id="mainFooter">
+    <div class="container">
+        <div class="footer-main row gy-5">
+            <div class="col-lg-4 col-md-12">
+                <a class="footer-brand" href="{% url 'landing' %}" aria-label="SousChefAI home">
+                    <img src="{% static 'images/logo.png' %}"
+                         alt="SousChef AI Logo"
+                         class="navbar-logo footer-logo"
+                         style="height: 70px; width: auto;">
+                </a>
+                <p class="footer-tagline">
+                    Your intelligent kitchen companion for meal ideas, pantry planning, and smarter cooking.
+                </p>
+                <div class="footer-contact">
+                    <a href="/contact-us/">
+                        <i class="bi bi-envelope me-2" aria-hidden="true"></i>Contact support
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="footer-heading">Product</h6>
+                <ul class="footer-links">
+                    <li><a href="{% url 'landing' %}">Home</a></li>
+                    <li><a href="{% url 'pantry' %}">Pantry</a></li>
+                    <li><a href="{% url 'recipe_discovery' %}">Recipe Discovery</a></li>
+                    <li><a href="{% url 'pricing' %}">Pricing</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="footer-heading">Company</h6>
+                <ul class="footer-links">
+                    <li><a href="{% url 'about_us' %}">About Us</a></li>
+                    <li><a href="{% url 'contact_us' %}">Contact Us</a></li>
+                    <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="footer-heading">Account</h6>
+                <ul class="footer-links">
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'account_settings' %}">Account settings</a></li>
+                        <li><a href="{% url 'saved_recipes' %}">Saved recipes</a></li>
+                        {% if user.is_staff %}
+                            <li><a href="{% url 'owner_dashboard' %}">Owner dashboard</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                        <li><a href="{% url 'register' %}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-6">
+                <h6 class="footer-heading">Get Started</h6>
+                <p class="footer-mini-copy">Turn your pantry into personalized recipes in minutes.</p>
+                {% if user.is_authenticated %}
+                    <a class="footer-cta" href="{% url 'recipe_discovery' %}">Find recipes</a>
+                {% else %}
+                    <a class="footer-cta" href="{% url 'register' %}">Create account</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 SousChefAI. All rights reserved.</p>
+            <div class="footer-bottom-links" aria-label="Legal links">
+                <a href="{% url 'privacy_policy' %}">Privacy</a>
+                <span aria-hidden="true">/</span>
+                <a href="{% url 'contact_us' %}">Support</a>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -4,10 +4,46 @@
 (function () {
     'use strict';
 
-    var searchInput = document.getElementById('pantry-catalog-search');
+    document.querySelectorAll('[data-image-error-action]').forEach(function (image) {
+        image.addEventListener('error', function () {
+            var action = image.getAttribute('data-image-error-action');
+
+            if (action === 'show-fallback-icon') {
+                image.classList.add('d-none');
+                var fallback = image.parentElement
+                    ? image.parentElement.querySelector('.pantry-ingtile-icon--fallback')
+                    : null;
+                if (fallback) {
+                    fallback.classList.remove('d-none');
+                }
+                return;
+            }
+
+            if (action === 'remove-catalog-item') {
+                var item = image.closest('.pantry-catalog-item');
+                if (item) {
+                    item.remove();
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-submit-on-change]').forEach(function (field) {
+        field.addEventListener('change', function () {
+            if (field.form) {
+                field.form.submit();
+            }
+        });
+    });
+}());
+
+(function () {
+    'use strict';
+
+    var searchInput = document.querySelector('#pantry-catalog-search');
     var groups = Array.prototype.slice.call(document.querySelectorAll('[data-catalog-group]'));
     var controls = document.querySelector('[data-catalog-controls]');
-    var showMoreBtn = document.getElementById('pantry-show-more-btn');
+    var showMoreBtn = document.querySelector('#pantry-show-more-btn');
     var items = Array.prototype.slice.call(document.querySelectorAll('[data-catalog-item]'));
     var initialVisible = controls ? parseInt(controls.getAttribute('data-initial-visible'), 10) : 50;
     var showMoreStep = controls ? parseInt(controls.getAttribute('data-show-more-step'), 10) : 16;
@@ -89,11 +125,12 @@
 (function () {
     'use strict';
 
-    var searchInput = document.getElementById('pantry-home-catalog-search');
+    // main idea: this search controls which quick add ingredient cards are visible on the home page.
+    var searchInput = document.querySelector('#pantry-home-catalog-search');
     var groups = Array.prototype.slice.call(document.querySelectorAll('[data-home-catalog-group]'));
     var items = Array.prototype.slice.call(document.querySelectorAll('[data-home-catalog-item]'));
-    var hintEl = document.getElementById('pantry-home-search-hint');
-    var emptyEl = document.getElementById('pantry-home-search-empty');
+    var hintEl = document.querySelector('#pantry-home-search-hint');
+    var emptyEl = document.querySelector('#pantry-home-search-empty');
 
     if (!searchInput || !items.length || !groups.length) {
         return;
@@ -135,7 +172,7 @@
 
 (function () {
     'use strict';
-    var root = document.getElementById('pantry-home-root');
+    var root = document.querySelector('#pantry-home-root');
     if (!root) {
         return;
     }
@@ -175,8 +212,8 @@
 (function () {
     'use strict';
 
-    var invForm = document.getElementById('pantry-inventory-bulk-form');
-    var selectAll = document.getElementById('pantry-inventory-select-all');
+    var invForm = document.querySelector('#pantry-inventory-bulk-form');
+    var selectAll = document.querySelector('#pantry-inventory-select-all');
     if (invForm && selectAll) {
         selectAll.addEventListener('change', function () {
             selectAll.indeterminate = false;
@@ -197,7 +234,8 @@
 
 (function () {
     'use strict';
-    var zoneRoot = document.getElementById('pantry-zone-root');
+    // main idea: this block handles add/remove buttons on catalog zone pages without reloading the page.
+    var zoneRoot = document.querySelector('#pantry-zone-root');
     if (!zoneRoot || !window.fetch || !window.FormData) {
         return;
     }
@@ -318,6 +356,7 @@
         input.value = String(v);
     });
 
+    // each catalog tile form is intercepted here so the response can update the card instantly.
     zoneRoot.querySelectorAll('.pantry-ingtile-actions-form').forEach(function (form) {
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -345,6 +384,7 @@
             // browsers and can omit `action`, which makes Django return HTML instead of JSON.
             var fd = new FormData(form);
             fd.set('action', actionVal);
+            // the form data is sent to django with ajax and the backend returns json.
             fetch(catalogQuickPostUrl(form), {
                 method: 'POST',
                 body: fd,

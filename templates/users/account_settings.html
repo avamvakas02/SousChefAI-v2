@@ -126,13 +126,8 @@
                             <div class="settings-panel rounded-4 p-4 mb-3">
                                 <h2 class="h6 mb-2">Subscription and Billing</h2>
                                 <p class="settings-muted small mb-3">Manage plan, payment method, invoices and renewals.</p>
-                                <a class="btn btn-outline-primary btn-sm me-2 settings-btn-secondary" href="{% url 'pricing' %}">View plans</a>
-                                <a class="btn btn-outline-secondary btn-sm settings-btn-secondary" href="{% url 'subscriptions_portal' %}">Billing portal</a>
-                            </div>
-
-                            <div class="settings-panel rounded-4 p-4 mb-3">
-                                <h2 class="h6 mb-2">Privacy and Notifications</h2>
-                                <p class="settings-muted small mb-2">Coming next: notification preferences, data export, and account privacy toggles.</p>
+                                <p class="small mb-3"><strong>Current plan:</strong> {{ current_plan_text }}</p>
+                                <a class="btn btn-outline-primary btn-sm me-2 settings-btn-secondary" href="{{ change_plan_url }}">Change plan</a>
                             </div>
 
                             <div class="settings-panel settings-panel-danger rounded-4 p-4">

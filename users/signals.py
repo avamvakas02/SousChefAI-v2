@@ -9,6 +9,8 @@ User = get_user_model()
 
 @receiver(post_save, sender=User)
 def create_profile_for_new_user(sender, instance, created, **kwargs):
+    # main idea: every new user gets a profile automatically.
+    # recipe generation uses the profile skill level when building prompts.
     if not created:
         return
     UserProfile.objects.get_or_create(user=instance)

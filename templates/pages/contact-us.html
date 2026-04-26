@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact Us | SousChefAI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="contact-hero py-5">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="contact-kicker">Contact Us</span>
+        <h1>We are here to help you cook with confidence.</h1>
+        <p class="contact-lead">
+          Have a question about your pantry, recipes, subscription, or the SousChefAI experience?
+          Send us a message and we will get back to you with practical, friendly support.
+        </p>
+        <div class="contact-hero-actions">
+          <a href="#contactForm" class="btn btn-primary btn-lg">Send a message</a>
+          <a href="{% url 'pricing' %}" class="btn btn-outline-primary btn-lg">View plans</a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="contact-hero-card">
+          <div class="contact-card-icon">
+            <i class="bi bi-chat-heart"></i>
+          </div>
+          <h2>Fast, human support</h2>
+          <p>
+            Whether you are setting up your kitchen profile or planning your next meal,
+            our team can help you make the most of SousChefAI.
+          </p>
+          <div class="contact-response">
+            <i class="bi bi-clock-history"></i>
+            <span>Typical response time: within 1 business day</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-options py-5">
+  <div class="container">
+    <div class="text-center contact-section-head">
+      <h2>Choose the best way to reach us</h2>
+      <p>We keep support simple, focused, and useful.</p>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-md-4">
+        <article class="contact-info-card h-100">
+          <i class="bi bi-envelope-paper"></i>
+          <h3>Email support</h3>
+          <p>For account, billing, and general product questions.</p>
+          <a href="mailto:support@souschefai.com">support@souschefai.com</a>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="contact-info-card h-100">
+          <i class="bi bi-lightbulb"></i>
+          <h3>Feature ideas</h3>
+          <p>Tell us what would make meal planning easier for you.</p>
+          <a href="mailto:ideas@souschefai.com">ideas@souschefai.com</a>
+        </article>
+      </div>
+      <div class="col-md-4">
+        <article class="contact-info-card h-100">
+          <i class="bi bi-shield-check"></i>
+          <h3>Privacy questions</h3>
+          <p>Ask about your data, account settings, or privacy choices.</p>
+          <a href="mailto:privacy@souschefai.com">privacy@souschefai.com</a>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-main py-5">
+  <div class="container">
+    <div class="row g-4 align-items-stretch">
+      <div class="col-lg-7">
+        <div class="contact-form-card h-100" id="contactForm">
+          <span class="contact-kicker">Message Us</span>
+          <h2>Tell us what you need</h2>
+          <p class="contact-form-intro">
+            Share a few details and we will point you in the right direction.
+          </p>
+
+          <form action="mailto:support@souschefai.com" method="post" enctype="text/plain" class="contact-form">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="contactName" class="form-label">Full name</label>
+                <input type="text" class="form-control" id="contactName" name="name" placeholder="Your name" required>
+              </div>
+              <div class="col-md-6">
+                <label for="contactEmail" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="contactEmail" name="email" placeholder="you@example.com" required>
+              </div>
+              <div class="col-12">
+                <label for="contactTopic" class="form-label">Topic</label>
+                <select class="form-select" id="contactTopic" name="topic" required>
+                  <option value="" selected disabled>Choose a topic</option>
+                  <option value="Account support">Account support</option>
+                  <option value="Recipe or pantry help">Recipe or pantry help</option>
+                  <option value="Billing question">Billing question</option>
+                  <option value="Feedback or feature idea">Feedback or feature idea</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label for="contactMessage" class="form-label">Message</label>
+                <textarea class="form-control" id="contactMessage" name="message" rows="6" placeholder="How can we help?" required></textarea>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary btn-lg contact-submit">
+                  Send message
+                  <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <aside class="contact-side-card h-100">
+          <h2>Before you write</h2>
+          <p>
+            A little context helps us answer faster. Include the page you were using,
+            what you expected, and what happened instead.
+          </p>
+
+          <div class="contact-guidelines">
+            <div class="guideline-item">
+              <span>01</span>
+              <div>
+                <h3>For recipe issues</h3>
+                <p>Mention your ingredients, filters, and the recipe name if available.</p>
+              </div>
+            </div>
+            <div class="guideline-item">
+              <span>02</span>
+              <div>
+                <h3>For billing questions</h3>
+                <p>Use the email connected to your SousChefAI account.</p>
+              </div>
+            </div>
+            <div class="guideline-item">
+              <span>03</span>
+              <div>
+                <h3>For feedback</h3>
+                <p>Tell us what would make your cooking routine smoother.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-cta py-5">
+  <div class="container">
+    <div class="contact-cta-box text-center">
+      <h2>Want to start cooking while you wait?</h2>
+      <p>Set up your pantry and discover recipe ideas built around what you already have.</p>
+      <a href="{% url 'pantry' %}" class="btn btn-primary btn-lg btn-cta">Open your pantry</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

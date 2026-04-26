@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 
 
+# main idea: this table is the user pantry.
+# each saved row belongs to one user and later becomes input for recipe generation.
 class PantryItem(models.Model):
     class Category(models.TextChoices):
         PRODUCE = "produce", "Produce"
