@@ -29,7 +29,7 @@ def _ai_recipe_image_url(title: str, pantry_names: list[str], recipe_id: str) ->
     )
 
 
-def _download_image_bytes(image_url: str, timeout: int = 30) -> bytes | None:
+def _download_image_bytes(image_url: str, timeout: int = 8) -> bytes | None:
     try:
         req = Request(
             image_url,
@@ -73,7 +73,7 @@ def _pexels_recipe_image_urls(title: str, needed: list[str]) -> list[str]:
             },
         )
         try:
-            with urlopen(req, timeout=20) as response:
+            with urlopen(req, timeout=8) as response:
                 payload = json.loads(response.read().decode("utf-8"))
         except (URLError, TimeoutError, OSError, json.JSONDecodeError, ValueError):
             continue
@@ -101,7 +101,7 @@ def _unsplash_recipe_image_urls(title: str, needed: list[str]) -> list[str]:
             headers={"User-Agent": "SousChefAI/1.0 (+unsplash-recipe-search)"},
         )
         try:
-            with urlopen(req, timeout=20) as response:
+            with urlopen(req, timeout=8) as response:
                 payload = json.loads(response.read().decode("utf-8"))
         except (URLError, TimeoutError, OSError, json.JSONDecodeError, ValueError):
             continue
@@ -158,7 +158,7 @@ def _gemini_generate_image_bytes(
         method="POST",
     )
     try:
-        with urlopen(req, timeout=45) as response:
+        with urlopen(req, timeout=20) as response:
             payload = response.read()
         parsed = json.loads(payload.decode("utf-8"))
     except (URLError, TimeoutError, json.JSONDecodeError, ValueError):
@@ -223,13 +223,21 @@ def _persist_generated_recipe_image(
             break
 
     if payload is None:
-        pexels_candidates = _pexels_recipe_image_urls(title, needed) or []
-        unsplash_candidates = _unsplash_recipe_image_urls(title, needed) or []
+        pexels_candidates = (
+            _pexels_recipe_image_urls(title, needed)
+            if provider in {"gemini", "pexels", "stock", "auto"}
+            else []
+        )
+        unsplash_candidates = (
+            _unsplash_recipe_image_urls(title, needed)
+            if provider in {"gemini", "unsplash", "stock", "auto"}
+            else []
+        )
         source_candidates = pexels_candidates + unsplash_candidates
         for image_source_url in source_candidates:
             if image_source_url in used_image_sources:
                 continue
-            candidate = _download_image_bytes(image_source_url, timeout=30)
+            candidate = _download_image_bytes(image_source_url)
             if candidate is not None:
                 fingerprint = hashlib.sha1(candidate).hexdigest()
                 if fingerprint in used_image_hashes:
@@ -239,7 +247,7 @@ def _persist_generated_recipe_image(
                 payload = candidate
                 break
 
-    if payload is None:
+    if payload is None and provider in {"pollinations", "ai"}:
         for attempt in range(4):
             seeded_id = recipe_id if attempt == 0 else f"{recipe_id}-fallback-{attempt + 1}"
             candidate = _download_image_bytes(_ai_recipe_image_url(title, pantry_names, seeded_id))
@@ -251,8 +259,8 @@ def _persist_generated_recipe_image(
             used_image_hashes.add(fingerprint)
             payload = candidate
             break
-        if payload is None:
-            return static("images/hero-image.jpg")
+    if payload is None:
+        return static("images/hero-image.jpg")
 
     try:
         destination.write_bytes(payload)
