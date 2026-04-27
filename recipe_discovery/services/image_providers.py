@@ -188,8 +188,9 @@ def _persist_generated_recipe_image(
     used_image_hashes: set[str],
 ) -> str:
     """
-    Generate and persist one recipe image under media/generated_recipes/.
     Returns a URL consumable by templates.
+    Stock providers return their hosted image URLs directly because production
+    does not serve runtime files written under MEDIA_ROOT.
     """
     media_dir = Path(settings.MEDIA_ROOT) / "generated_recipes"
     media_dir.mkdir(parents=True, exist_ok=True)
@@ -237,28 +238,17 @@ def _persist_generated_recipe_image(
         for image_source_url in source_candidates:
             if image_source_url in used_image_sources:
                 continue
-            candidate = _download_image_bytes(image_source_url)
-            if candidate is not None:
-                fingerprint = hashlib.sha1(candidate).hexdigest()
-                if fingerprint in used_image_hashes:
-                    continue
-                used_image_sources.add(image_source_url)
-                used_image_hashes.add(fingerprint)
-                payload = candidate
-                break
+            used_image_sources.add(image_source_url)
+            return image_source_url
 
     if payload is None and provider in {"pollinations", "ai"}:
         for attempt in range(4):
             seeded_id = recipe_id if attempt == 0 else f"{recipe_id}-fallback-{attempt + 1}"
-            candidate = _download_image_bytes(_ai_recipe_image_url(title, pantry_names, seeded_id))
-            if candidate is None:
+            image_url = _ai_recipe_image_url(title, pantry_names, seeded_id)
+            if image_url in used_image_sources:
                 continue
-            fingerprint = hashlib.sha1(candidate).hexdigest()
-            if fingerprint in used_image_hashes:
-                continue
-            used_image_hashes.add(fingerprint)
-            payload = candidate
-            break
+            used_image_sources.add(image_url)
+            return image_url
     if payload is None:
         return static("images/hero-image.jpg")
 
