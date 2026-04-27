@@ -202,6 +202,9 @@ def _persist_generated_recipe_image(
 
     payload = None
     provider = (getattr(settings, "RECIPE_IMAGE_PROVIDER", "gemini") or "gemini").lower()
+    if provider in {"fallback", "static", "none"}:
+        return static("images/hero-image.jpg")
+
     if provider == "gemini":
         for attempt in range(4):
             candidate = _gemini_generate_image_bytes(
