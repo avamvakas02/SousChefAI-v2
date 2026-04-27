@@ -90,7 +90,7 @@ def _gemini_generate_recipe_cards(
     if not api_key or not pantry_names:
         return [], "Missing Gemini API key or pantry ingredients."
 
-    model = getattr(settings, "GEMINI_RECIPE_MODEL", "") or "gemini-1.5-flash"
+    model = getattr(settings, "GEMINI_RECIPE_MODEL", "") or "gemini-2.5-flash"
     pantry_csv = ", ".join(pantry_names[:35])
     difficulty_mix = _difficulty_mix_for_skill(skill_level)
     difficulty_line = ", ".join(difficulty_mix)

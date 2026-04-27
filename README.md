@@ -137,7 +137,7 @@ http://127.0.0.1:8000/
 ### Recipe Images and AI
 
 - `GEMINI_API_KEY`
-- `GEMINI_RECIPE_MODEL` - defaults to `gemini-1.5-flash`
+- `GEMINI_RECIPE_MODEL` - defaults to `gemini-2.5-flash`
 - `GEMINI_IMAGE_MODEL` - defaults to `gemini-2.0-flash-preview-image-generation`
 - `RECIPE_IMAGE_PROVIDER` - defaults to `gemini`
 - `PEXELS_API_KEY`

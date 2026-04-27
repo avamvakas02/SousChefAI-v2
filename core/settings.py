@@ -368,7 +368,7 @@ PANTRY_SHOW_INGREDIENT_IMAGES = os.getenv("PANTRY_SHOW_INGREDIENT_IMAGES", "True
 
 # Gemini recipe discovery
 GEMINI_API_KEY = _env_clean("GEMINI_API_KEY")
-GEMINI_RECIPE_MODEL = _env_clean("GEMINI_RECIPE_MODEL") or "gemini-1.5-flash"
+GEMINI_RECIPE_MODEL = _env_clean("GEMINI_RECIPE_MODEL") or "gemini-2.5-flash"
 GEMINI_IMAGE_MODEL = _env_clean("GEMINI_IMAGE_MODEL") or "gemini-2.0-flash-preview-image-generation"
 RECIPE_IMAGE_PROVIDER = _env_clean("RECIPE_IMAGE_PROVIDER") or "gemini"
 
