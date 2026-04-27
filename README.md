@@ -26,7 +26,6 @@ SousChefAI is a Django web application that helps users discover recipes from pa
 - Gunicorn for deployment
 - Stripe for billing
 - Gemini API for AI recipe generation
-- In order for you to access locally the Gemini API key you have to generate your own 
 - TheMealDB ingredient list API for pantry ingredient catalog data
 
 ## Project Structure
